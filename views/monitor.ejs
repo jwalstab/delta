@@ -17,7 +17,7 @@
         AddData();
     }
     function AddData() {
-        console.log("Add data func");
+        //console.log("Add data func");
         var statusText = document.getElementById('Status');
         if (simulating == false) {
             statusText.firstChild.nodeValue = "Not Monitoring";
@@ -89,44 +89,18 @@
                         if (checkButtonExists == null)
                         {
                         console.log("not created");
-                        var button = document.createElement("button");
+                        var button = $("<button type='button' class='btn btn-danger' id='" + keyNames[j] + "' onClick ='OnLabelButtonPress(this.id)' value=" + keyNames[j] + "'>" + keyNames[j] + "</button>")
+                        //var button = document.createElement("button");
                         //button.type = "button";
-                        button.setAttribute('class', 'btn btn-danger');
-                        button.setAttribute('id', keyNames[j]);
-                        button.setAttribute('value', keyNames[j]);
+                        //button.setAttribute('class', 'btn-danger');
+                        //button.setAttribute('id', keyNames[j]);
+                        //button.setAttribute('value', keyNames[j]);
                         //button.id = keyNames[j];
                         //button.value = keyNames[j];
                         //button.className = "btn btn-danger",
-                        button.onclick = function(){
-                            var thisButtonID = this.id;
-                            console.log(thisButtonID);
-                            var alreadyAdded = false;
-                            DataKeysToDisplay.forEach(element => {
-                                if (element == this.id)
-                                {
-                                    alreadyAdded = true;
-                                }
-                            });
-                            if (alreadyAdded === true)
-                            {
-                                var thisButton = document.getElementById(thisButtonID);
-                                thisButton.className = "btn btn-danger"
-                                ChartRemoveData(window.myLine, thisButtonID);
-                                DataKeysToDisplay.pop(thisButtonID);
-                                //console.log("removed!");
-                                ShowData(false);
-                            }
-                            else{
-                                var thisButton = document.getElementById(thisButtonID);
-                                thisButton.className = "btn btn-sucess"
-                                ChartRemoveData(window.myLine, thisButtonID);
-                                chartAddData(window.myLine, thisButtonID);
-                                DataKeysToDisplay.push(thisButtonID);
-                                //console.log("added!");
-                                ShowData(false);
-                            }
-                        };
-                        buttonContainer.appendChild(button);
+                        //button.onclick = 
+                        $('#buttonContainer').append(button);
+                        //buttonContainer.appendChild(button);
                         }
                     }
                     //END CREATE BUTTONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -148,7 +122,7 @@
         });
     }
     function ShowData(master){
-        console.log("show data func");
+        //console.log("show data func");
         TimeArrayToShow = [];
         GlobalData.forEach(element => {
             var jsTime = new Date(element.time);
@@ -213,6 +187,8 @@
         ChartRemoveAllData(window.myLine);
     };
 
+
+    
     function ChartUpdateDataByName(chart, name, data) {
         chart.data.datasets.forEach((dataset) => {
             if (dataset.label == name)
@@ -268,6 +244,30 @@
         });
         chart.update();
     }
+    function OnLabelButtonPress(thisButtonID){
+                            console.log(thisButtonID);
+                            var alreadyAdded = false;
+                            DataKeysToDisplay.forEach(element => {
+                                if (element == thisButtonID)
+                                {
+                                    alreadyAdded = true;
+                                }
+                            });
+                            if (alreadyAdded === true)
+                            {
+                                $("#" + thisButtonID).removeClass("btn btn-sucess").addClass("btn btn-danger");
+                                ChartRemoveData(window.myLine, thisButtonID);
+                                DataKeysToDisplay.pop(thisButtonID);
+                                ShowData(false);
+                            }
+                            else{
+                                $("#" + thisButtonID).removeClass("btn btn-danger").addClass("btn btn-sucess");
+                                ChartRemoveData(window.myLine, thisButtonID);
+                                chartAddData(window.myLine, thisButtonID);
+                                DataKeysToDisplay.push(thisButtonID);
+                                ShowData(false);
+                            }
+                        };
 </script>
 
 <section class="content">
@@ -291,7 +291,7 @@
         <div class="row clearfix">
             <div class="col-lg-3 col-md-12 col-sm-12">
                 <div class="card">
-                    <div class="body" id="buttonContainer">
+                    <div class="body" id="buttonContainerOLD">
                         <h6>Device Broadcast ID</h6>
                         <input type="text" class="form-control" id="LegioGuardIDText" value="" />
                         <br />
@@ -338,6 +338,13 @@
                 </div>
             </div>
         </div>
+        <div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="body" id="buttonContainer">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
