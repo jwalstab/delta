@@ -72,25 +72,15 @@
                 ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
                 if (expressedData != null)
                 {
-                    //SET UP TIME ARRAY
-                    var listOfTime = [];
-                    for (var i = 0; i < maxPacketsFinal; i++) {
-                        var jsTime = new Date(data[i].time);
-                        var localTime = jsTime.toLocaleTimeString();
-                        var hours = jsTime.getHours();
-                        var minutes = jsTime.getMinutes();
-                        var seconds = jsTime.getSeconds();
-                        var formattedTime = hours + ':' + minutes + ':' + seconds;
-                        listOfTime.push(localTime);
-                    }
-
                     var keyNames = [];
-                    //CREATE BUTTONS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    data.forEach(element => {
-                        var innerKeyNames = Object.keys(element);
-                        innerKeyNames.forEach(element => {
+                    var getLabelsSmall = Object.keys(data[0]);
+                    getLabelsSmall.forEach(element => { //gets labels for buttons
+                        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                        }
+                        else
+                        {
                         keyNames.push(element);
-                        });
+                        }
                     });
                     var buttonContainer = document.getElementById('APIResponse');
                     for (var j = 0; j < keyNames.length; j++)
@@ -98,12 +88,18 @@
                         var checkButtonExists = document.getElementById(keyNames[j]);
                         if (checkButtonExists == null)
                         {
-                        var button = document.createElement("input");
-                        button.type = "button";
-                        button.id = keyNames[j];
-                        button.value = keyNames[j];
+                        console.log("not created");
+                        var button = document.createElement("button");
+                        //button.type = "button";
+                        button.setAttribute('class', 'btn btn-danger');
+                        button.setAttribute('id', keyNames[j]);
+                        button.setAttribute('value', keyNames[j]);
+                        //button.id = keyNames[j];
+                        //button.value = keyNames[j];
+                        //button.className = "btn btn-danger",
                         button.onclick = function(){
                             var thisButtonID = this.id;
+                            console.log(thisButtonID);
                             var alreadyAdded = false;
                             DataKeysToDisplay.forEach(element => {
                                 if (element == this.id)
@@ -113,12 +109,17 @@
                             });
                             if (alreadyAdded === true)
                             {
+                                var thisButton = document.getElementById(thisButtonID);
+                                thisButton.className = "btn btn-danger"
                                 ChartRemoveData(window.myLine, thisButtonID);
                                 DataKeysToDisplay.pop(thisButtonID);
                                 //console.log("removed!");
                                 ShowData(false);
                             }
                             else{
+                                var thisButton = document.getElementById(thisButtonID);
+                                thisButton.className = "btn btn-sucess"
+                                ChartRemoveData(window.myLine, thisButtonID);
                                 chartAddData(window.myLine, thisButtonID);
                                 DataKeysToDisplay.push(thisButtonID);
                                 //console.log("added!");
