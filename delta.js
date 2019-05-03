@@ -20,7 +20,6 @@ MongoClient.connect("mongodb+srv://quantum:Quantumdata123@cluster0-jjukt.mongodb
 
 ////////WEB SERVER
 
-
 app.use(express.static(path.join(__dirname,'public')));
 app.use(expressLayouts);
 
@@ -40,7 +39,8 @@ app.get("/:url", function(req, res) {
 });
 
 
-//////////API 
+
+//////////API SERVER
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -54,7 +54,7 @@ app.post("/:deviceid", function(req, res) {
   });
 });
 
-app.get("/:deviceid", function(req, res) {
+app.get("/:deviceid/get", function(req, res) {
   db.collection(req.params.deviceid).find({}).toArray(function(err, docs){
     res.send(docs);
     res.end();
@@ -65,6 +65,26 @@ app.get("/:deviceid/last/:amount", function(req, res) {
   var limitAmount = parseInt(req.params.amount);
   db.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
     res.send(docs);
+    res.end();
+  });
+});
+
+app.get("/:deviceid/date", function(req, res) {
+  db.collection(req.params.deviceid).find({}).toArray(function(err, docs){
+    arrayResult = [];
+    to = new Date(2021,10,30);
+    from = new Date(2011,10,30);
+    docs.forEach(element => {
+      var check = new Date(element.time);
+      if((check.getTime() <= to.getTime() && check.getTime() >= from.getTime()))
+      {
+        arrayResult.push(check);
+      }
+    });
+    arrayResult.forEach(element => {
+      console.log(element);
+    });
+    res.send("finished!");
     res.end();
   });
 });
