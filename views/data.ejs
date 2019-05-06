@@ -139,19 +139,51 @@
         var dateFromObj = new Date(document.getElementById("dateFrom").value);
         var dateToObj = new Date(document.getElementById("dateTo").value);
         var lgid = document.getElementById('LegioGuardIDText').value;
-        fetch('http://165.22.241.11:3000/52/betweendates', {
-            method: 'post',
-            body: JSON.stringify(dateFromObj + dateToObj)
-            }).then(function(response) {
-             return response.json();
-            }).then(function(data) {
-            data.forEach(element => {
-                console.log(element);
-            });
+        var res3 = "http://165.22.241.11:3000/52/betweendates"
+        $.ajax({
+            type: "GET",
+            url: res3,
+            data: JSON.stringify(dateFromObj + dateToObj),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                GlobalData = [];
+                data.forEach(element => {
+                    GlobalData.push(element);
+                });
+                var expressedData = data[0];
+                var maxPackets = packetsToDisplay;
+                for (var ed = 0; ed < 10; ed++) {
+                    const dataCheck = data[ed];
+                    if (dataCheck == null) {
+                        maxPackets = ed - 1;
+                        console.log(maxPackets + "data check phase");
+                    }
+                }
+                var maxPacketsFinal;
+                if (maxPackets < packetsToDisplay) {
+                    maxPacketsFinal = maxPackets;
+                }
+                else {
+                    maxPacketsFinal = packetsToDisplay;
+                }
+                ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
+                if (expressedData != null)
+                {
+                    TableWizard(data);
+                }
+                else {
+                    console.log("EXPRESSED DATA NULL!")
+                }
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
         });
     }
 </script>
-<script src="~/assets/plugins/jquery-inputmask/jquery.inputmask.bundle.js"></script> <!-- Input Mask Plugin Js -->
+<script src="assets/plugins/jquery-inputmask/jquery.inputmask.bundle.js"></script> <!-- Input Mask Plugin Js -->
 <script>
     var $demoMaskedInput = $('.demo-masked-input');
     $demoMaskedInput.find('.datetime').inputmask('d/m/y h:s', { placeholder: '__/__/____ __:__', alias: "datetime", hourFormat: '24' });
