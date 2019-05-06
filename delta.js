@@ -21,26 +21,6 @@ var db;
 });
 
 
-////////WEB SERVER
-
-app.use(express.static(path.join(__dirname,'public')));
-app.use(expressLayouts);
-
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
-app.get('/public/assets/images/favico.ico' , function(req , res){/*code*/});
-
-app.get("/", function(req, res) {
-  //res.sendFile(__dirname + '/Index.html');
-  res.render('index');
-});
-
-app.get("/:url", function(req, res) {
-  //res.sendFile(__dirname + '/' + req.params.url + '.html');
-  res.render(req.params.url);
-});
-
 
 
 //////////API SERVER
@@ -68,6 +48,7 @@ app.get("/:deviceid/get", function(req, res) {
 app.get("/:deviceid/last/:amount", function(req, res) {
   var limitAmount = parseInt(req.params.amount);
   db.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
     res.send(docs);
     res.end();
   });
@@ -124,3 +105,34 @@ app.post("/:deviceid/betweendates", function(req, res) {
     res.end();
   });
 });
+
+
+////////WEB SERVER
+
+app.use(express.static(path.join(__dirname,'public')));
+app.use(expressLayouts);
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.get('/public/assets/images/favico.ico' , function(req , res){/*code*/});
+
+app.get("/", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('index');
+});
+
+app.get("/monitor", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('monitor');
+});
+
+app.get("/tables", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('data');
+});
+
+/* app.get("/:url", function(req, res) {
+  //res.sendFile(__dirname + '/' + req.params.url + '.html');
+  res.render(req.params.url);
+}); */

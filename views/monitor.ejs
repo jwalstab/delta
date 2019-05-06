@@ -55,6 +55,8 @@
                     GlobalData.push(element);
                 });
                 //console.log(GlobalData.length);
+                var LastBroadcastTimeText = document.getElementById('LastBroadcastTime');
+                LastBroadcastTimeText.firstChild.nodeValue = (data[0].time);
                 var APIReplyText = document.getElementById('APIResponse');
                 APIReplyText.firstChild.nodeValue = "OK!"
                 //remove later, replace using data.length((((((((((((((((((((()))))))))))))))))))))
