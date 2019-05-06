@@ -55,8 +55,6 @@
                     GlobalData.push(element);
                 });
                 //console.log(GlobalData.length);
-                var LastBroadcastTimeText = document.getElementById('LastBroadcastTime');
-                LastBroadcastTimeText.firstChild.nodeValue = (data[0].time);
                 var APIReplyText = document.getElementById('APIResponse');
                 APIReplyText.firstChild.nodeValue = "OK!"
                 //remove later, replace using data.length((((((((((((((((((((()))))))))))))))))))))
@@ -306,10 +304,6 @@
                         <br />
                         <h6>Monitoring Status:</h6>
                         <h7 id="Status">Not Connected</h7>
-                        <br />
-                        <br />
-                        <h6>Last data recieved at: </h6>
-                        <input type="text" style="border:none" class="form-control" id="LastBroadcastTime" value="" />
                         <br />
                         <br />
                         <h6>Response from API server: </h6>
