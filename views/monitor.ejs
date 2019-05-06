@@ -28,10 +28,14 @@
         }
         var packetsToDisplay = 10;
 
-        var str1 = "http://157.230.247.159:3000/";
+        var str1 = "http://127.0.0.1:3000/";
         var str2 = document.getElementById('LegioGuardIDText').value;
-        var str3 = "/last/"
+        var str3 = "/last1/"
         var str4 = packetsToDisplay;
+
+        var iotnumber = {"iotn":555};
+        var iotnumberj = JSON.stringify(iotnumber);
+        console.log(iotnumberj);
         
         var res = str1.concat(str2);
         var res2 = res.concat(str3);
@@ -41,6 +45,7 @@
         $.ajax({
             type: "GET",
             url: res3,
+            data: JSON.stringify(iotnumber),
             contentType: "application/json; charset=utf-8",
             crossDomain: true,
             dataType: "json",

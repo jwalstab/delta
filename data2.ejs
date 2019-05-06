@@ -1,0 +1,154 @@
+<section class="content">
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body block-header">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <h2>Data Tables Lookup</h2>
+                                <ul class="breadcrumb p-l-0 p-b-0 ">
+                                    <li class="breadcrumb-item active">Select IOT device ID and dates to show all data recieved between these times</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="body">
+                        <h6>Device Broadcast ID</h6>
+                        <input type="text" class="form-control" id="LegioGuardIDText" value="" />
+                        <div class="demo-masked-input">
+                            <b>From</b>
+                            <div class="input-group">
+                                <span class="input-group-addon"> <i class="zmdi zmdi-calendar-note"></i></span>
+                                <input type="text" class="form-control datetime" placeholder="Ex: 30/07/2016 23:59" id="dateFrom">
+                            </div>
+                        </div>
+                        <div class="demo-masked-input">
+                            <b>To</b>
+                            <div class="input-group">
+                                <span class="input-group-addon"> <i class="zmdi zmdi-calendar-note"></i></span>
+                                <input type="text" class="form-control datetime" placeholder="Ex: 30/07/2016 23:59" id="dateTo">
+                            </div>
+                        </div>
+                        <br />
+                        <button class="btn btn-success" id="myButton" onclick="GetAPIData()">Load data table</button>
+                        <br />
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Table Data</strong></h2>
+                    </div>
+                    <div class="body">
+                        <div id="myMenu">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+
+    //$(document).ready(
+    function TableWizard(data) {
+
+        var getLabelsSmall = Object.keys(data[0]);
+        getLabelsSmall.forEach(element => { //gets labels for buttons
+        
+        var Parent = document.getElementById("myMenu");
+        while (Parent.hasChildNodes()) {
+            Parent.removeChild(Parent.firstChild);
+        }
+        ///
+        /// Main table
+        ///
+        var tableDiv = $("<div class='table-responsive'>");
+
+        $('#myMenu').append(tableDiv);
+        
+        var table = $("<table class='table'>");
+
+        tableDiv.append(table);
+
+        ///
+        /// Table head
+        ///
+        html = "<thead>" +
+            "    <tr>" +
+            "        <th><strong>Time</strong></th>" +
+            "        <th><strong>Sensor 1</strong></th>" +
+            "        <th><strong>Sensor 2</strong></th>" +
+            "        <th><strong>Sensor 3</strong></th>" +
+            "     </tr>" +
+            "</thead>";
+
+        var tableHead = $(html);
+        table.append(tableHead);
+
+        ///
+        /// Table data
+        ///
+        var count = Object.keys(data).length;
+        var gridRowCount = count;
+
+        for (var rowCount = 0; rowCount < gridRowCount; rowCount++) {
+            html = "<tr>";
+
+            for (var cellCount = 0; cellCount < 4; cellCount++) {
+                if (cellCount == 0) {
+                    var oTime = new Date(data[rowCount].time);
+                    var p1time = oTime.toLocaleString();
+                    html = html + "<td>" + p1time + "</td>";
+                }
+                if (cellCount == 1) {
+                    html = html + "<td>" + data[rowCount].sensor1 + "</td>";
+                }
+                if (cellCount == 2) {
+                    html = html + "<td>" + data[rowCount].sensor2 + "</td>";
+                }
+                if (cellCount == 3) {
+                    html = html + "<td>" + data[rowCount].sensor3 + "</td>";
+                }
+            }
+            html = html + "</tr>";
+
+            table.append($(html));
+        }
+    };
+
+</script>
+<script>
+    function GetAPIData() {
+        var dateFromObj = new Date(document.getElementById("dateFrom").value);
+        var dateToObj = new Date(document.getElementById("dateTo").value);
+        var lgid = document.getElementById('LegioGuardIDText').value;
+        var fromStr = ("https://quantumdata.azurewebsites.net/api/values/" + lgid + "/"
+            + dateFromObj.getFullYear() + "/" + dateFromObj.getMonth() + "/" + dateFromObj.getDay() + "/" + dateFromObj.getHours() + "/" + dateFromObj.getMinutes() + "/" + "0"
+            + "/" + "to" + "/"
+            + dateToObj.getFullYear() + "/" + dateToObj.getMonth() + "/" + dateToObj.getDay() + "/" + dateToObj.getHours() + "/" + dateToObj.getMinutes() + "/" + "0");
+        //res = fromStr.concat(toStr);
+        console.log(fromStr);
+        fetch(fromStr)
+            .then(response => response.json())
+            .then(data => {
+                TableWizard(data);
+            });
+    }
+</script>
+<script src="~/assets/plugins/jquery-inputmask/jquery.inputmask.bundle.js"></script> <!-- Input Mask Plugin Js -->
+<script>
+    var $demoMaskedInput = $('.demo-masked-input');
+    $demoMaskedInput.find('.datetime').inputmask('d/m/y h:s', { placeholder: '__/__/____ __:__', alias: "datetime", hourFormat: '24' });
+</script>
