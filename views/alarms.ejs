@@ -104,10 +104,9 @@
 
 <!--SCRIPT FOR ADDING NEW ALARMS-->
 <script>
-var bla = "visible";
-    LoadDeviceSelectMenu();
-    ChooseOperatorDropDownBox();
 
+    //var masterURL = "http://127.0.0.1:3000" //LOCAL
+    var masterURL = "http://165.22.241.11:3000" //CLOUD
     var chosenDevice;
     var chosenDeviceName;
     var chosenOperator;
@@ -118,6 +117,10 @@ var bla = "visible";
     //var labelList = [];
     var alarmList = [];
     var chosenUser = "jwalstab";
+
+    LoadDeviceSelectMenu();
+    ChooseOperatorDropDownBox();
+    
     
     function AddAlarmButtonPress(){
     var chosenName = document.getElementById('alarmnameinputbox').value;
@@ -138,7 +141,7 @@ var bla = "visible";
     function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber) {
         
         createdAlarm = chosenName;
-        var registerurl = "http://127.0.0.1:3000/alarms/" + chosenUser + "/" + chosenDevice;
+        var registerurl = masterURL + "/alarms/" + chosenUser + "/" + chosenDevice;
         var alarmAlreadyExists = false;
         var objtopost = {
                 alarmName: chosenName,
@@ -183,7 +186,7 @@ var bla = "visible";
     //////////////////////////////////////////////////////////////////////drop down box area
     function RemoveAlarmButtonPress()
     {
-        var deleteAlarmURL = "http://127.0.0.1:3000/alarms/delete/" + chosenUser + "/" + chosenDevice;
+        var deleteAlarmURL = masterURL + "/alarms/delete/" + chosenUser + "/" + chosenDevice;
                 
         var alarmToDelete = {
                 alarmName: chosenAlarm
@@ -214,7 +217,7 @@ var bla = "visible";
     }
 
     function LoadDeviceSelectMenu(){
-        var res3 = "http://127.0.0.1:3000/jwalstab/lookup_devices/"
+        var res3 = masterURL + "/jwalstab/lookup_devices/";
         $.ajax({
             type: "GET",
             url: res3,
@@ -232,12 +235,14 @@ var bla = "visible";
             },
             error: function (jqXHR, status) {
                 console.log("ERROR");
+                console.log(jqXHR);
+                console.log(status);
             }
         });
     }
     
     function LoadDeviceLabelsMenu(){
-        var res3 = "http://127.0.0.1:3000/" + chosenDevice + "/last/1";
+        var res3 = masterURL + "/" + chosenDevice + "/last/1";
         $.ajax({
             type: "GET",
             url: res3,
@@ -393,7 +398,7 @@ var bla = "visible";
     }
 
     function LoadTableDataFromAPI(chosenDevice) {
-        var urlstr = "http://127.0.0.1:3000/alarmlist/" + chosenUser + "/" + chosenDevice;
+        var urlstr = masterURL + "/alarmlist/" + chosenUser + "/" + chosenDevice;
         $.ajax({ type: "GET", url: urlstr, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
             success: function (data, status, jqXHR) {
                 if (data != null)
