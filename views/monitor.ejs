@@ -32,10 +32,6 @@
         var str2 = document.getElementById('LegioGuardIDText').value;
         var str3 = "/last/"
         var str4 = packetsToDisplay;
-
-       // var iotnumber = {"iotn":555};
-        //var iotnumberj = JSON.stringify(iotnumber);
-        //console.log(iotnumberj);
         
         var res = str1.concat(str2);
         var res2 = res.concat(str3);
@@ -74,7 +70,7 @@
                 else {
                     maxPacketsFinal = packetsToDisplay;
                 }
-                ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
+                ///((((((((((((((((((((((((((((((((GETS LABELS FROM DATA))))))))))))))))))))))))))))))))
                 if (expressedData != null)
                 {
                     var keyNames = [];
@@ -95,23 +91,10 @@
                         {
                         console.log("not created");
                         var button = $("<button type='button' class='btn btn-danger' id='" + keyNames[j] + "' onClick ='OnLabelButtonPress(this.id)' value=" + keyNames[j] + "'>" + keyNames[j] + "</button>")
-                        //var button = document.createElement("button");
-                        //button.type = "button";
-                        //button.setAttribute('class', 'btn-danger');
-                        //button.setAttribute('id', keyNames[j]);
-                        //button.setAttribute('value', keyNames[j]);
-                        //button.id = keyNames[j];
-                        //button.value = keyNames[j];
-                        //button.className = "btn btn-danger",
-                        //button.onclick = 
                         $('#buttonContainer').append(button);
-                        //buttonContainer.appendChild(button);
                         }
                     }
                     //END CREATE BUTTONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                    //console.log(DataKeysToDisplay);
-                    //console.log(GlobalData);
                     ShowData(true);
                 }
                 else {
@@ -203,12 +186,10 @@
         });
         chart.update();
     }
-
     function labelchartupdater(chart, data) {
         chart.data.labels = data;
         chart.update();
     }
-
     function chartAddData(chart, dataName){
         chart.data.datasets.push({
         label: dataName,
@@ -218,7 +199,6 @@
         });
         chart.update();
     }
-
     function getRandomRgb() {
     var num = Math.round(0xffffff * Math.random());
     var r = num >> 16;
@@ -226,7 +206,6 @@
     var b = num & 255;
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
     }
-
     function ChartRemoveData(chart, dataName){
         chart.data.datasets.forEach((dataset) => {
             if (dataset.label == dataName)

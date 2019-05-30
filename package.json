@@ -12,7 +12,9 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-ejs-layouts": "^2.5.0",
-    "mongodb": "^3.2.3"
+    "moment": "^2.24.0",
+    "mongodb": "^3.2.3",
+    "nodemailer": "^6.2.1"
   },
   "devDependencies": {},
   "description": ""

@@ -1,0 +1,416 @@
+<section class="content">
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body block-header">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <h2>IoT Alarm Management</h2>
+                                <ul class="breadcrumb p-l-0 p-b-0 ">
+                                    <li class="breadcrumb-item active">Use this area to create, remove and view your IoT device alarms</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Inline Layout -->
+        <!-- VIEW ALARMS SECTION-->
+        <div class="row clearfix">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Selected IoT Device</strong></h2>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                Select Device
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="addalarmchoosedevicemenu">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="header">
+                        <h2><strong>Add new alarm</strong></h2>
+                        <!--choose label dropdown-->
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            Select Value
+                            <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu" aria-labelledby="dataLabelsMenu1" id="dataLabelsMenu">
+                                <li><a href="#" data-value="action"> No Data </a></li>
+                            </ul>
+                        </div>
+                        <!--choose operator dropdown-->
+                        <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Choose Operator
+                                  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="alarmOperatorMenu" id="alarmOperatorMenu">
+                                <li><a href="#" data-value="action">Greater than</a></li>
+                                <li><a href="#" data-value="action">Less than</a></li>
+                                <li><a href="#" data-value="action">Equal to</a></li>
+                                </ul>
+                        </div>
+                        <div class="form-group">
+                                <input type="text" id="alarmnumberinputbox" class="form-control" placeholder="Number to check agaisnt">
+                        </div>
+                        <div class="form-group">
+                                <input type="text" id="alarmnameinputbox" class="form-control" placeholder="Name of alarm">
+                        </div>
+                        <button class="btn btn-success" id="myButton" onclick="AddAlarmButtonPress()">Create new alarm</button>
+                    </div>
+                    <div class="header">
+                            <h2><strong>Remove an alarm</strong></h2>
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    Select Alarm
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="alarmMenu">
+                                </ul>
+                            </div>
+                            <button class="btn btn-danger" id="myButton" onclick="RemoveAlarmButtonPress()">Remove alarm</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-12">
+                <div class="card">
+                    <div class="header" id="alarmtitlearea">
+                        <h2><strong>Please select an IoT device to view</strong></h2>
+                    </div>
+                    <div class="body">
+                        <div id="maintable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>  
+       <<div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header" id="responseheader">
+                    </div>
+                    <div class="body" id="responsebody">
+                    </div>
+                </div>
+            </div>
+        </div>  
+  
+</section>
+
+<!--SCRIPT FOR ADDING NEW ALARMS-->
+<script>
+var bla = "visible";
+    LoadDeviceSelectMenu();
+    ChooseOperatorDropDownBox();
+
+    var chosenDevice;
+    var chosenDeviceName;
+    var chosenOperator;
+    var chosenValue;
+    var chosenAlarm;
+    var createdAlarm;
+    var deviceList = [];
+    //var labelList = [];
+    var alarmList = [];
+    var chosenUser = "jwalstab";
+    
+    function AddAlarmButtonPress(){
+    var chosenName = document.getElementById('alarmnameinputbox').value;
+    var chosenNumber = parseInt(document.getElementById('alarmnumberinputbox').value);
+
+    //checks to make sure all values are filled out
+    if (chosenDevice == null || chosenOperator == null || chosenValue == null || chosenName == null || chosenNumber == null)
+    {
+        console.log("if statement failed");
+        DisplayResult("error","You have not filled out all required fields in order to create a new alarm")
+    }
+    else
+    {
+                RegisterAlarmTodb(chosenUser,chosenDevice, chosenName, chosenValue, chosenOperator, chosenNumber)
+    }
+    }
+
+    function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber) {
+        
+        createdAlarm = chosenName;
+        var registerurl = "http://127.0.0.1:3000/alarms/" + chosenUser + "/" + chosenDevice;
+        var alarmAlreadyExists = false;
+        var objtopost = {
+                alarmName: chosenName,
+                alarmValue: chosenValue,
+                alarmOperator: chosenOperator,
+                alarmNumber: chosenNumber
+            };
+        alarmList.forEach(element => {
+            if (element == chosenName)
+            {
+                alarmAlreadyExists = true;
+                DisplayResult("exists");
+            }
+        });
+        if (alarmAlreadyExists == false)
+        {
+            $.ajax({
+            type: "POST",
+            url: registerurl,
+            data: JSON.stringify(objtopost),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            success: function (data, status, jqXHR) {
+                DisplayResult("added");
+                console.log("ajax post ok");
+                LoadTableDataFromAPI(chosenDevice);
+            },
+            error: function (jqXHR, status) {
+                DisplayResult("error",jqXHR);
+                console.log("ajax post error");
+                console.log(jqXHR);
+                console.log(status);
+            }
+        });
+        }
+        else
+        {
+            console.log("alarm already exists");
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////drop down box area
+    function RemoveAlarmButtonPress()
+    {
+        var deleteAlarmURL = "http://127.0.0.1:3000/alarms/delete/" + chosenUser + "/" + chosenDevice;
+                
+        var alarmToDelete = {
+                alarmName: chosenAlarm
+            };
+
+        var check = JSON.stringify(alarmToDelete);
+        console.log(check);
+        console.log(chosenAlarm + "removed!");
+        $.ajax({
+            type: "POST",
+            url: deleteAlarmURL,
+            data: JSON.stringify(alarmToDelete),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            success: function (data, status, jqXHR) {
+                //TO DO DISPLAY CORRECT RESULT DisplayResult("added");
+                console.log("ajax post ok");
+                LoadTableDataFromAPI(chosenDevice);
+                DisplayResult("removed");
+            },
+            error: function (jqXHR, status) {
+                DisplayResult("removeerror",jqXHR);
+                console.log("ajax post error");
+                console.log(jqXHR);
+                console.log(status);
+            }
+        });
+    }
+
+    function LoadDeviceSelectMenu(){
+        var res3 = "http://127.0.0.1:3000/jwalstab/lookup_devices/"
+        $.ajax({
+            type: "GET",
+            url: res3,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#addalarmchoosedevicemenu').append(newlink);
+                    deviceList.push(element);
+                });
+                ChooseDeviceDropDownBox();
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+    function LoadDeviceLabelsMenu(){
+        var res3 = "http://127.0.0.1:3000/" + chosenDevice + "/last/1";
+        $.ajax({
+            type: "GET",
+            url: res3,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                var keyNames = [];
+                if (data[0] != null)
+                {
+                    var getLabelsSmall = Object.keys(data[0]);
+                    getLabelsSmall.forEach(element => { //gets labels for buttons
+                        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                        }
+                        else
+                        {
+                        keyNames.push(element);
+                        }
+                    });
+                }
+                else
+                {
+                    console.log('none!');
+                }
+                //creates the links in the dropdown menu
+                    $("#dataLabelsMenu").empty();
+                    keyNames.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element + '</a></li>');
+                    $('#dataLabelsMenu').append(newlink);
+                    //labelList.push(element);
+                });
+                ChooseValueDropDownBox();
+/*                 var testin = $('#dataLabelsMenu').parents(".dropdown").find('.btn').val($('#dataLabelsMenu').data('value'));
+                console.log(testin[0].innerText); */
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+
+    function ChooseDeviceDropDownBox(){
+    //adds code to change when device selected
+    $("#addalarmchoosedevicemenu li a").click(function(){
+        DisplayResult();
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        //
+        deviceList.forEach(element => {
+        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+            {
+                chosenDevice = element.deviceID;
+                chosenDeviceName = element.devicename;
+                LoadDeviceLabelsMenu();
+                LoadTableDataFromAPI(chosenDevice);
+                var alarmtitle = document.getElementById("alarmtitlearea");
+                while (alarmtitle.firstChild) {alarmtitle.removeChild(alarmtitle.firstChild);}
+                var alarmTitleWithName = $('<h2><strong>Viewing alarms for ' + chosenDeviceName + '</strong></h2>');
+                $('#alarmtitlearea').append(alarmTitleWithName);
+            }
+        });
+    console.log(chosenDevice);
+    });
+    }
+
+    function ChooseValueDropDownBox(){
+    //adds code to change when device selected
+    $("#dataLabelsMenu li a").click(function(){
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        chosenValue = selectedvaluefromdropdownbox[0].innerText;
+        console.log(chosenValue);
+    });
+    }
+
+    function ChooseOperatorDropDownBox(){
+    //adds code to change when device selected
+    $("#alarmOperatorMenu li a").click(function(){
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        chosenOperator = selectedvaluefromdropdownbox[0].innerText;
+        console.log(chosenOperator);
+    });
+    }
+
+    function ChooseAlarmDropDownBox(){
+    //adds code to change when device selected
+    $("#alarmMenu li a").click(function(){
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        chosenAlarm = selectedvaluefromdropdownbox[0].innerText;
+        console.log(chosenAlarm);
+    });
+    }
+
+    function DisplayResult(result, errdetails){
+
+    //clear the header and body of results
+    var myNode = document.getElementById("responseheader");
+    while (myNode.firstChild) {
+    myNode.removeChild(myNode.firstChild);
+    }
+    var myNode2 = document.getElementById("responsebody");
+    while (myNode2.firstChild) {
+    myNode2.removeChild(myNode2.firstChild);
+    }
+
+    if (result == "added")
+    {
+        var rheader = $('<h2><strong>Your alarm '+ createdAlarm + 'was added sucessfully</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was sucessfully created </p>');
+    }
+    if (result == "removed")
+    {
+        var rheader = $('<h2><strong>Your alarm '+ chosenAlarm +' was removed sucessfully</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was sucessfully created </p>');
+    }
+    if (result == "exists")
+    {
+        var rheader = $('<h2><strong>Your alarm '+ createdAlarm +' was not able to be created</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was not able to be created because the alarm name of ' + createdAlarm + ' is already in use</p>');
+    }
+    if (result == "error")
+    {
+        var rheader = $('<h2><strong>Error! Alarm creation failed</strong></h2>');
+        var rbody = $('<p>Your alarm was not created due to the following error: ' + errdetails + '</p>');
+    }
+    if (result == "removeerror")
+    {
+        var rheader = $('<h2><strong>Error! Alarm deletion failed</strong></h2>');
+        var rbody = $('<p>Your alarm was not removed due to the following error: ' + errdetails + '</p>');
+    }
+    $('#responseheader').append(rheader);
+    $('#responsebody').append(rbody);
+    }
+
+    function crazytable(data){
+        //main table creation, link to ext script
+    var table = new Tabulator("#maintable", {
+        pagination:"local",
+        paginationSize:10,
+        paginationSizeSelector:[10, 25, 50, 100, 250, 500, 1000],
+        autoColumns:true
+    });
+    data.forEach(element => {
+        delete element._id;
+    });
+    table.setData(data);
+    }
+
+    function LoadTableDataFromAPI(chosenDevice) {
+        var urlstr = "http://127.0.0.1:3000/alarmlist/" + chosenUser + "/" + chosenDevice;
+        $.ajax({ type: "GET", url: urlstr, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
+            success: function (data, status, jqXHR) {
+                if (data != null)
+                {
+                    crazytable(data);
+                    alarmList = [];
+                    $("#alarmMenu").empty();
+                    data.forEach(element => {
+                        alarmList.push(element.alarmName);
+                        var newlink = $('<li><a href="#" data-value="action">' + element.alarmName + '</a></li>');
+                        $('#alarmMenu').append(newlink);
+                    });
+                    ChooseAlarmDropDownBox();
+                }
+                else {console.log("EXPRESSED DATA NULL!")}},
+            error: function (jqXHR, status) {console.log("ERROR");}
+        });
+    }
+    
+</script>

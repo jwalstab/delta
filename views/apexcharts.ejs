@@ -1,0 +1,516 @@
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<link href="assets/scroll.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<section class="content">
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body block-header">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <h2>Data Tables Lookup</h2>
+                                <ul class="breadcrumb p-l-0 p-b-0 ">
+                                    <li class="breadcrumb-item active">Select IOT device ID and dates to show all data recieved between these times</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="body">
+                        <b>From</b>
+                        <input type="text" class="form-control datetime" id="dateFrom">
+                        <b>To</b>
+                        <input type="text" class="form-control datetime" id="dateTo">
+                        <br />
+                        <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Select Device
+                                  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="dropper">
+                                </ul>
+                        </div>
+                        <button class="btn btn-success" id="myButton" onclick="GetAPIData()">Load data table</button>
+                        <br />
+                        </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-12">
+                    <div class="card">
+                        <div class="header" id="rheader">
+                            <h2><strong>Historic Chart</strong></h2>
+                        </div>
+                        <div class="body">
+                                <div id="chart">
+                                    </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+            <div class="row clearfix">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="card">
+                        <div class="body" id="buttonContainer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    //global variables and function loaders
+
+    LoadDropDownBox();
+    LoadDatePickers();
+    var chosenDevice;
+    var deviceList = [];
+
+    var GlobalData = [];
+    var DataKeysToDisplay = [];
+
+    //////////////////////////////////////////////////////////////////////drop down box area
+    function LoadDropDownBox(){
+        var res3 = "http://127.0.0.1:3000/jwalstab/lookup_devices/"
+        $.ajax({
+            type: "GET",
+            url: res3,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#dropper').append(newlink);
+                    deviceList.push(element);
+                });
+                //adds code to change when device selected
+                $(".dropdown-menu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    deviceList.forEach(element => {
+                        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+                        {
+                            chosenDevice = element.deviceID;
+                        }
+                    });
+                    console.log(chosenDevice);
+                    });
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+    function ChartCreateButtons(data){
+                GlobalData = [];
+                data.forEach(element => {
+                    GlobalData.push(element);
+                });
+                //remove later, replace using data.length((((((((((((((((((((()))))))))))))))))))))
+                var expressedData = data[0];
+                ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
+                if (expressedData != null)
+                {
+                    var keyNames = [];
+                    var getLabelsSmall = Object.keys(data[0]);
+                    getLabelsSmall.forEach(element => { //gets labels for buttons
+                        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                        }
+                        else
+                        {
+                        keyNames.push(element);
+                        }
+                    });
+                    var buttonContainer = document.getElementById('APIResponse');
+                    for (var j = 0; j < keyNames.length; j++)
+                    {
+                        var checkButtonExists = document.getElementById(keyNames[j]);
+                        if (checkButtonExists == null)
+                        {
+                        console.log("not created");
+                        var button = $("<button type='button' class='btn btn-danger' id='" + keyNames[j] + "' onClick ='OnLabelButtonPress(this.id)' value=" + keyNames[j] + "'>" + keyNames[j] + "</button>")
+                        $('#buttonContainer').append(button);
+                        }
+                    }
+                    //END CREATE BUTTONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    ShowData(true);
+                }
+                else {
+                    console.log("EXPRESSED DATA NULL!")
+                }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
+    function GetAPIData() {
+        var packetsToDisplay = 10;
+        var fromVal = new Date(document.getElementById("dateFrom").value);
+        var toVal = new Date(document.getElementById("dateTo").value);
+        var dates = {
+            from: fromVal,
+            to: toVal
+        };
+        console.log(dates.to);
+        console.log(dates.from);
+        console.log(dates);
+        //var lgid = document.getElementById('LegioGuardIDText').value;
+        var res3 = "http://127.0.0.1:3000/" + chosenDevice + "/betweendates";
+        $.ajax({
+            type: "POST",
+            url: res3,
+            data: JSON.stringify(dates),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                GlobalData = [];
+                data.forEach(element => {
+                    GlobalData.push(element);
+                });
+                
+                var expressedData = data[0];
+                ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
+                if (expressedData != null)
+                {
+                    var keyNames = [];
+                    var getLabelsSmall = Object.keys(data[0]);
+                    getLabelsSmall.forEach(element => { //gets labels for buttons
+                        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                        }
+                        else
+                        {
+                        keyNames.push(element);
+                        }
+                    });
+                    var firstTime = true;
+                    keyNames.forEach(propname => {
+                            var DataToPush = [];
+                            GlobalData.forEach(globalpiece => {
+                                if (globalpiece[propname] != null)
+                                    {
+                                        if (typeof globalpiece[propname] === "boolean"){
+                                            if (globalpiece[propname] == true)
+                                            {
+                                                globalpiece[propname] = 100;
+                                            }
+                                            else
+                                            {
+                                                (globalpiece[propname] = 1);
+                                            }
+                                        }
+                                        var miniArray = [];
+                                        miniArray.push(globalpiece.time, globalpiece[propname]);
+                                        DataToPush.push(miniArray);
+                                    }
+                            });
+                        if (firstTime == true)
+                        {
+                            var options3 = GenerateData(DataToPush,propname);
+                            if (chart != null)
+                            {
+                                chart.destroy();
+                            }
+                            chart = new ApexCharts(document.querySelector("#chart"), options3);
+                            chart.render();
+                            firstTime = false;
+                            chart.toggleSeries(propname);
+                        }
+                        else{
+                        UpdateSeries(DataToPush,propname);
+                        }
+                    });
+                }
+                else {
+                    console.log("EXPRESSED DATA NULL!")
+                }
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////load date pickers
+    function LoadDatePickers(){
+        var fpfrom = flatpickr(document.getElementById('dateFrom'), {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: "Y-m-d H:i",
+});
+
+    var fpto = flatpickr(document.getElementById('dateTo'), {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: "Y-m-d H:i",
+});
+    }
+
+    function ShowData(){
+        //console.log("show data func");
+        TimeArrayToShow = [];
+        GlobalData.forEach(element => {
+            var jsTime = new Date(element.time);
+            let hoursDiff = jsTime.getHours() + jsTime.getTimezoneOffset() / 60;
+            let minutesDiff = (jsTime.getMinutes() + jsTime.getTimezoneOffset()) % 60;
+            jsTime.setHours(hoursDiff + 1);
+            jsTime.setMinutes(minutesDiff);
+            var localTime = jsTime.toLocaleTimeString();
+            var hours = jsTime.getHours();
+            var minutes = jsTime.getMinutes();
+            var seconds = jsTime.getSeconds();
+            var localDate = jsTime.toLocaleDateString();
+            var formattedTime = localDate + " " + hours + ':' + minutes + ':' + seconds;
+            TimeArrayToShow.push(localDate + " " + localTime);
+            console.log(localTime);
+        });
+        //console.log(TimeArrayToShow);
+        DataKeysToDisplay.forEach(propname => {
+            var DataToPush = [];
+            GlobalData.forEach(globalpiece => {
+                if (globalpiece[propname] != null)
+                    {
+                        DataToPush.push(globalpiece[propname]);
+                    }
+            });
+            //console.log(DataToPush);
+            ChartUpdateDataByName(window.myLine,propname,DataToPush);
+        });
+    }
+
+    var options = {
+      chart: {
+        type: "area",
+        height: 600,
+        foreColor: "#999",
+        stacked: false,
+        dropShadow: {
+          enabled: true,
+          enabledSeries: [0],
+          top: -2,
+          left: 2,
+          blur: 5,
+          opacity: 0.06
+        },
+        tooltip: {
+          enabled: true,
+          shared: true,
+          x: {
+          format: "dd MMM yyyy HH:mm:ss"
+            }
+        },
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true | '<img src="/static/icons/reset.png" width="20">',
+            customIcons: []
+          },
+          autoSelected: 'zoom' 
+        },
+      },
+      colors: ['#00E396', '#0090FF'],
+      stroke: {
+        curve: "smooth",
+        width: 3
+      },
+      dataLabels: {
+        enabled: false
+      },
+      series: [{
+        name: 'Today',
+        data: generateDayWiseTimeSeries(0,18)
+      },
+    ],
+      markers: {
+        size: 0,
+        strokeColor: "#fff",
+        strokeWidth: 3,
+        strokeOpacity: 1,
+        fillOpacity: 1,
+        hover: {
+          size: 6
+        }
+      },
+      xaxis: {
+        type: "datetime",
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
+      },
+      yaxis: {
+        tickAmount: 4,
+        min: 0,
+        labels: {
+          offsetX: 24,
+          offsetY: -5
+        },
+      },
+      grid: {
+        padding: {
+          left: -5,
+          right: 5
+        }
+      },
+      legend: {
+        position: 'bottom',
+        horizontalAlign: 'left'
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          inverseColors: false,
+          opacityFrom: 0.5,
+          opacityTo: 0,
+          stops: [0, 90, 100]
+        },
+      }
+    };
+
+    function GenerateData(firstData,firstDataName)
+    {
+        var options2 = {
+      chart: {
+        type: 'area',
+        stacked: false,
+        height: 750,
+        zoom: {
+          type: 'x',
+          enabled: true
+        },
+        toolbar: {
+          autoSelected: 'zoom'
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      series: [{
+        name: firstDataName,
+        data: firstData
+      }],
+      markers: {
+        size: 0,
+      },
+      title: {
+        text: ' ',
+        align: 'left'
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          inverseColors: false,
+          opacityFrom: 0.5,
+          opacityTo: 0,
+          stops: [0, 90, 100]
+        },
+      },
+      yaxis: {
+        tickAmount: 4,
+        min: 0
+/*         labels: {
+          offsetX: 24,
+          offsetY: -5
+        } */
+        },
+      xaxis: {
+        type: 'datetime',
+      },
+      tooltip: {
+          enabled: true,
+          shared: true,
+          x: {
+          format: "dd MMM yyyy HH:mm:ss"
+            }
+        }
+    }
+    return options2
+    }
+
+    var chart;
+
+    function UpdateSeries(newdata, dataname){
+        chart.appendSeries({
+        name: dataname,
+        data: newdata
+    });
+    chart.toggleSeries(dataname);
+    //chart.toggleSeries('Today');
+    }
+
+    function generateDayWiseTimeSeries(s, count) {
+      var values = [[
+        4,3,10,9,29,19,25,9,12,7,19,5,13,9,17,2,7,5
+      ], [
+        2,3,8,7,22,16,23,7,11,5,12,5,10,4,15,2,6,2
+      ]];
+      var i = 0;
+      var series = [];
+      var x = new Date("11 Nov 2019").getTime();
+      while (i < count) {
+        series.push([x, values[s][i]]);
+        x += 86400000;
+        i++;
+      }
+      return series;
+    }
+
+    function StartSeries(){
+        var a = new Date();
+        var b = 0;
+        var c = [];
+        c.push(a,b);
+        return c;
+    }
+    
+    function OnLabelButtonPress(thisButtonID){
+                            console.log(thisButtonID);
+                            var alreadyAdded = false;
+                            DataKeysToDisplay.forEach(element => {
+                                if (element == thisButtonID)
+                                {
+                                    alreadyAdded = true;
+                                }
+                            });
+                            if (alreadyAdded === true)
+                            {
+                                $("#" + thisButtonID).removeClass("btn btn-sucess").addClass("btn btn-danger");
+                                ChartRemoveData(window.myLine, thisButtonID);
+                                DataKeysToDisplay.pop(thisButtonID);
+                                ShowData(false);
+                            }
+                            else{
+                                $("#" + thisButtonID).removeClass("btn btn-danger").addClass("btn btn-sucess");
+                                ChartRemoveData(window.myLine, thisButtonID);
+                                chartAddData(window.myLine, thisButtonID);
+                                DataKeysToDisplay.push(thisButtonID);
+                                ShowData(false);
+                            }
+                        };
+
+</script>

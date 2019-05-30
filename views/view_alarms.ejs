@@ -1,0 +1,135 @@
+<section class="content">
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body block-header">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <h2>View Alarms</h2>
+                                <ul class="breadcrumb p-l-0 p-b-0 ">
+                                    <li class="breadcrumb-item active">Select IOT device ID to view all currently setup alarms</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Select Device
+                                  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="dropper">
+                                </ul>
+                        </div>
+                        <button class="btn btn-success" id="myButton" onclick="GetAPIData()">Load alarms list</button>
+                        <br />
+                        </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-12">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>View all alarms setup for each IoT Device</strong></h2>
+                    </div>
+                    <div class="body">
+                        <div id="maintable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    //global variables and function loaders
+    
+    LoadDropDownBox();
+    var chosenDeviceViewSection;
+    var chosenUser = "jwalstab";
+    var deviceList = [];
+    //////////////////////////////////////////////////////////////////////drop down box area
+    function LoadDropDownBox(){
+        var res3 = "http://127.0.0.1:3000/jwalstab/lookup_devices/"
+        $.ajax({
+            type: "GET",
+            url: res3,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#dropper').append(newlink);
+                    deviceList.push(element);
+                });
+                //adds code to change when device selected
+                $(".dropdown-menu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    deviceList.forEach(element => {
+                        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+                        {
+                            chosenDevice = element.deviceID;
+                        }
+                    });
+                    console.log(chosenDevice);
+                    });
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////table area
+    function crazytable(data){
+        //main table creation, link to ext script
+    var table = new Tabulator("#maintable", {
+        pagination:"local",
+        paginationSize:10,
+        paginationSizeSelector:[10, 25, 50, 100, 250, 500, 1000],
+        autoColumns:true
+    });
+    data.forEach(element => {
+        delete element._id;
+    });
+    table.setData(data);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
+    function GetAPIData() {
+        var urlstr = "http://127.0.0.1:3000/alarmlist/" + chosenUser + "/" + chosenDevice;
+        $.ajax({
+            type: "GET",
+            url: urlstr,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                ///(((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))
+                if (data != null)
+                {
+                    //TableAPP(data);
+                    crazytable(data);
+                }
+                else {
+                    console.log("EXPRESSED DATA NULL!")
+                }
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+</script>

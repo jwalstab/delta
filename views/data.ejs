@@ -1,3 +1,9 @@
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+
+
 <section class="content">
     <div class="container">
         <div class="row clearfix">
@@ -20,26 +26,22 @@
             <div class="col-lg-3 col-md-12 col-sm-12">
                 <div class="card">
                     <div class="body">
-                        <h6>Device Broadcast ID</h6>
-                        <input type="text" class="form-control" id="LegioGuardIDText" value="" />
-                        <div class="demo-masked-input">
-                            <b>From</b>
-                            <div class="input-group">
-                                <span class="input-group-addon"> <i class="zmdi zmdi-calendar-note"></i></span>
-                                <input type="text" class="form-control datetime" placeholder="Ex: 30/07/2016 23:59" id="dateFrom">
-                            </div>
-                        </div>
-                        <div class="demo-masked-input">
-                            <b>To</b>
-                            <div class="input-group">
-                                <span class="input-group-addon"> <i class="zmdi zmdi-calendar-note"></i></span>
-                                <input type="text" class="form-control datetime" placeholder="Ex: 30/07/2016 23:59" id="dateTo">
-                            </div>
-                        </div>
+                        <b>From</b>
+                        <input type="text" class="form-control datetime" id="dateFrom">
+                        <b>To</b>
+                        <input type="text" class="form-control datetime" id="dateTo">
                         <br />
+                        <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Select Device
+                                  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="dropper">
+                                </ul>
+                        </div>
                         <button class="btn btn-success" id="myButton" onclick="GetAPIData()">Load data table</button>
                         <br />
-                    </div>
+                        </div>
                 </div>
             </div>
             <div class="col-lg-9 col-md-12">
@@ -64,7 +66,50 @@
 </section>
 
 <script type="text/javascript">
+    //global variables and function loaders
+
+    LoadDropDownBox();
+    LoadDatePickers();
+    var chosenDevice;
+    var deviceList = [];
     
+    //////////////////////////////////////////////////////////////////////drop down box area
+    function LoadDropDownBox(){
+        var res3 = "http://127.0.0.1:3000/jwalstab/lookup_devices/"
+        $.ajax({
+            type: "GET",
+            url: res3,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#dropper').append(newlink);
+                    deviceList.push(element);
+                });
+                //adds code to change when device selected
+                $(".dropdown-menu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    deviceList.forEach(element => {
+                        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+                        {
+                            chosenDevice = element.deviceID;
+                        }
+                    });
+                    console.log(chosenDevice);
+                    });
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////table area
     function crazytable(data){
         //main table creation, link to ext script
     var table = new Tabulator("#maintable", {
@@ -79,9 +124,9 @@
     var labels = (Object.keys(data[0]));
     averageData = JSON.parse(JSON.stringify(data[0])); // clone object here
     var counter = 0;
-    for (var i = 0; i < data.length; i++)
+    for (var i = 0; i < data.length; i++) //cycles through all rows pulled from db
     {
-        labels.forEach(element => {
+        labels.forEach(element => { //cycles through all colums pulled from db
                 if (element == "time" || element == "_id"){// loops through all data above, then below adds each element together
                         }
                 else{
@@ -104,11 +149,9 @@
     averageDataArray = [];
     averageDataArray.push(averageData); //table needs an array or some bs to work
     averagetable.setData(averageDataArray);
-    //console.log(averageData);
     }
 
-</script>
-<script>
+    //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
     function GetAPIData() {
         var packetsToDisplay = 10;
         var fromVal = new Date(document.getElementById("dateFrom").value);
@@ -120,8 +163,8 @@
         console.log(dates.to);
         console.log(dates.from);
         console.log(dates);
-        var lgid = document.getElementById('LegioGuardIDText').value;
-        var res3 = "http://165.22.241.11:3000/52/betweendates"
+        //var lgid = document.getElementById('LegioGuardIDText').value;
+        var res3 = "http://127.0.0.1:3000/" + chosenDevice + "/betweendates";
         $.ajax({
             type: "POST",
             url: res3,
@@ -165,11 +208,19 @@
             }
         });
     }
-</script>
-<script src="assets/plugins/jquery-inputmask/jquery.inputmask.bundle.js"></script> <!-- Input Mask Plugin Js -->
-<link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-<script src ="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script>
-    var $demoMaskedInput = $('.demo-masked-input');
-    $demoMaskedInput.find('.datetime').inputmask('d/m/y h:s', { placeholder: '__/__/____ __:__', alias: "datetime", hourFormat: '24' });
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////load date pickers
+    function LoadDatePickers(){
+        var fpfrom = flatpickr(document.getElementById('dateFrom'), {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: "Y-m-d H:i",
+});
+
+    var fpto = flatpickr(document.getElementById('dateTo'), {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: "Y-m-d H:i",
+});
+    }
 </script>
