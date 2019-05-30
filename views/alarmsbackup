@@ -8,6 +8,7 @@
                             <div class="col-lg-12 col-md-12 col-sm-12">
                                 <h2>IoT Alarm Management</h2>
                                 <ul class="breadcrumb" id="responsebody">
+                                    <li class="breadcrumb-item active">Use this area to create, remove and view your IoT device alarms</li>
                                 </ul>
                             </div>
                         </div>
@@ -78,6 +79,12 @@
                 </div>
             </div>
             <div class="col-lg-9 col-md-9">
+<!--                     <div class="card">
+                            <div class="header" id="responseheader">
+                            </div>
+                            <div class="body" >
+                            </div>
+                        </div> -->
                 <div class="card">
                     <div class="header" id="alarmtitlearea">
                         <h2><strong>Please select an IoT device to view</strong></h2>
@@ -86,15 +93,23 @@
                         <div id="maintable"></div>
                     </div>
                 </div>
+
             </div>
         </div> 
+        <div class="col-lg-9 col-md-9 col-sm-12">
+
+        </div>
+       <<div class="row clearfix">
+
+        </div>  
+  
 </section>
 
 <!--SCRIPT FOR ADDING NEW ALARMS-->
 <script>
 
-    //var masterURL = "http://127.0.0.1:3000" //LOCAL
-    var masterURL = "http://165.22.241.11:3000" //CLOUD
+    var masterURL = "http://127.0.0.1:3000" //LOCAL
+    //var masterURL = "http://165.22.241.11:3000" //CLOUD
     var chosenDevice;
     var chosenDeviceName;
     var chosenOperator;
@@ -333,6 +348,10 @@
     function DisplayResult(result, errdetails){
 
     //clear the header and body of results
+    var myNode = document.getElementById("responseheader");
+    while (myNode.firstChild) {
+    myNode.removeChild(myNode.firstChild);
+    }
     var myNode2 = document.getElementById("responsebody");
     while (myNode2.firstChild) {
     myNode2.removeChild(myNode2.firstChild);
@@ -340,24 +359,30 @@
 
     if (result == "added")
     {
-        var rbody = $('<p>Your alarm '+ createdAlarm + ' for device ' + chosenDeviceName + ' was sucessfully created </p>');
+        var rheader = $('<h2><strong>Your alarm '+ createdAlarm + ' was added sucessfully</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was sucessfully created </p>');
     }
     if (result == "removed")
     {
-        var rbody = $('<p>Your alarm '+ chosenAlarm +' for device ' + chosenDeviceName + ' was sucessfully removed </p>');
+        var rheader = $('<h2><strong>Your alarm '+ chosenAlarm +' was removed sucessfully</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was sucessfully removed </p>');
     }
     if (result == "exists")
     {
-        var rbody = $('<p>Your alarm '+ createdAlarm +' for device ' + chosenDeviceName + ' was not able to be created because the alarm name of ' + createdAlarm + ' is already in use</p>');
+        var rheader = $('<h2><strong>Your alarm '+ createdAlarm +' was not able to be created</strong></h2>');
+        var rbody = $('<p>The alarm for device ' + chosenDeviceName + ' was not able to be created because the alarm name of ' + createdAlarm + ' is already in use</p>');
     }
     if (result == "error")
     {
+        var rheader = $('<h2><strong>Error! Alarm creation failed</strong></h2>');
         var rbody = $('<p>Your alarm was not created due to the following error: ' + errdetails + '</p>');
     }
     if (result == "removeerror")
     {
+        var rheader = $('<h2><strong>Error! Alarm deletion failed</strong></h2>');
         var rbody = $('<p>Your alarm was not removed due to the following error: ' + errdetails + '</p>');
     }
+    $('#responseheader').append(rheader);
     $('#responsebody').append(rbody);
     }
 

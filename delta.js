@@ -165,7 +165,7 @@ app.get("/alarmtest", function(req, res) {
   });
 });
 
-//create a new alarm
+//create a new alarm from req.body
 app.post("/alarms/:username/:deviceid", function(req, res) {
   alarmdb = outsideDatabase.db('alarms_' + req.params.username);
   alarmdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
@@ -174,7 +174,7 @@ app.post("/alarms/:username/:deviceid", function(req, res) {
   });
 });
 
-//create a new alarm
+//delete an alarm based of req.body
 app.post("/alarms/delete/:username/:deviceid/", function(req, res) {
   alarmdb = outsideDatabase.db('alarms_' + req.params.username);
   console.log(req.body);
@@ -231,16 +231,15 @@ function AlarmProcessor(deviceID, deviceData, username){
           {
             if (deviceData[deviceValue] > alarm.alarmNumber)
             {
-              console.log("ALARM TRIGGERED!");
               devicedb.collection(username).find({}).toArray(function(err, deviceList)
               {
                 deviceList.forEach(device => {if (device.deviceID == deviceID)
                   {
                     SendEmail
                     (device.devicename + "" + alarm.alarmName + " Alarm",
-                    "<h1>" + device.devicename + " Alarm Triggered</h1>" + 
+                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
                     "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
-                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") has exceeded the value of " 
+                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was greater than the value of " 
                     + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
                   }
                 });
@@ -249,11 +248,41 @@ function AlarmProcessor(deviceID, deviceData, username){
           }
           if (alarm.alarmOperator == "Less than")
           {
-            if (deviceData[deviceValue] < alarm.alarmNumber){console.log("ALARM TRIGGERED!");}
+            if (deviceData[deviceValue] < alarm.alarmNumber)
+            {
+              devicedb.collection(username).find({}).toArray(function(err, deviceList)
+              {
+                deviceList.forEach(device => {if (device.deviceID == deviceID)
+                  {
+                    SendEmail
+                    (device.devicename + "" + alarm.alarmName + " Alarm",
+                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
+                    "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
+                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was less than the value of " 
+                    + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
+                  }
+                });
+              });
+            }
           }
           if (alarm.alarmOperator == "Equal to")
           {
-            if (deviceData[deviceValue] == alarm.alarmNumber){console.log("ALARM TRIGGERED!");}
+            if (deviceData[deviceValue] == alarm.alarmNumber)
+            {
+              devicedb.collection(username).find({}).toArray(function(err, deviceList)
+              {
+                deviceList.forEach(device => {if (device.deviceID == deviceID)
+                  {
+                    SendEmail
+                    (device.devicename + "" + alarm.alarmName + " Alarm",
+                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
+                    "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
+                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was equal to the value of " 
+                    + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
+                  }
+                });
+              });
+            }
           }
         }
       });
@@ -285,13 +314,13 @@ app.get("/monitor", function(req, res) {
   res.render('monitor');
 });
 
-app.get("/tables", function(req, res) {
+app.get("/data_tables", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
-  res.render('data');
+  res.render('data_tables');
 });
 
-app.get("/charts", function(req, res) {
-  res.render('apexcharts');
+app.get("/data_charts", function(req, res) {
+  res.render('data_charts');
 });
 
 app.get("/register_iot", function(req, res) {
@@ -300,10 +329,6 @@ app.get("/register_iot", function(req, res) {
 
 app.get("/alarms", function(req, res) {
   res.render('alarms');
-});
-
-app.get("/view_alarms", function(req, res) {
-  res.render('view_alarms');
 });
 
 app.post("/register_iot", function(req, res) {
