@@ -289,7 +289,8 @@ function AlarmProcessor(deviceID, deviceData, username){
                       deviceValueNumber: deviceData[deviceValue],
                       alarmOperator: alarm.alarmOperator,
                       alarmNumber: alarm.alarmNumber,
-                      alarmTriggeredAt: deviceData.time
+                      alarmTriggeredAt: deviceData.time,
+                      alarmEmailAddress: alarm.alarmEmailAddress
                     }
                     triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
                     triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
@@ -319,12 +320,39 @@ function AlarmProcessor(deviceID, deviceData, username){
               {
                 deviceList.forEach(device => {if (device.deviceID == deviceID)
                   {
-                    SendEmail
-                    (device.devicename + "" + alarm.alarmName + " Alarm",
-                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
-                    "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
-                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was less than the value of " 
-                    + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
+                    if(alarm.alarmEmailAlerts == "On")
+                    {
+                      SendEmail
+                      (alarm.alarmEmailAddress, device.devicename + "" + alarm.alarmName + " Alarm",
+                      "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
+                      "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
+                      + deviceValue + " with a value of (" + deviceData[deviceValue] +") was less than the value of " 
+                      + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>");
+                    }
+                    var alarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time,
+                      alarmEmailAddress: alarm.alarmEmailAddress
+                    }
+                    triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
+                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
+
+                    var bellAlarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time,
+                      deviceName: device.devicename
+                    }
+
+                    bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + username);
+                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {console.log(alarmRecord);});
                   }
                 });
               });
@@ -338,12 +366,39 @@ function AlarmProcessor(deviceID, deviceData, username){
               {
                 deviceList.forEach(device => {if (device.deviceID == deviceID)
                   {
-                    SendEmail
-                    (device.devicename + "" + alarm.alarmName + " Alarm",
-                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
-                    "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
-                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was equal to the value of " 
-                    + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
+                    if(alarm.alarmEmailAlerts == "On")
+                    {
+                      SendEmail
+                      (alarm.alarmEmailAddress, device.devicename + "" + alarm.alarmName + " Alarm",
+                      "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
+                      "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
+                      + deviceValue + " with a value of (" + deviceData[deviceValue] +") was equal to the value of " 
+                      + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>");
+                    }
+                    var alarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time,
+                      alarmEmailAddress: alarm.alarmEmailAddress
+                    }
+                    triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
+                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
+
+                    var bellAlarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time,
+                      deviceName: device.devicename
+                    }
+
+                    bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + username);
+                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {console.log(alarmRecord);});
                   }
                 });
               });
