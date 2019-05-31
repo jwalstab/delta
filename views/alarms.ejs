@@ -61,6 +61,16 @@
                         <div class="form-group">
                                 <input type="text" id="alarmnameinputbox" class="form-control" placeholder="Name of alarm">
                         </div>
+                        <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Email Alerts Options
+                                  <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu scrollable-menu" aria-labelledby="emailMenu1" id="emailMenu">
+                                <li><a data-value="action">Email Alerts: ON</a></li>
+                                <li><a data-value="action">Email Alerts: OFF</a></li>
+                                </ul>
+                        </div>
                         <button class="btn btn-success" id="myButton" onclick="AddAlarmButtonPress()">Create new alarm</button>
                     </div>
                     <div class="header">
@@ -75,17 +85,29 @@
                             </div>
                             <button class="btn btn-danger" id="myButton" onclick="RemoveAlarmButtonPress()">Remove alarm</button>
                     </div>
+                    <div class="header">
+                            <h2><strong>Triggered Alarms</strong></h2>
+                            <button class="btn btn-danger" onclick="ClearTriggeredAlarms()">Clear Triggered Alarms</button>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-9 col-md-9">
                 <div class="card">
                     <div class="header" id="alarmtitlearea">
-                        <h2><strong>Please select an IoT device to view</strong></h2>
+                        <h2><strong>View alarms: Please select an IoT device to view</strong></h2>
                     </div>
                     <div class="body">
                         <div id="maintable"></div>
                     </div>
                 </div>
+                <div class="card">
+                        <div class="header" id="triggeredalarmtitlearea">
+                            <h2><strong>View triggered alarms: Please select an IoT device to view</strong></h2>
+                        </div>
+                        <div class="body">
+                            <div id="triggeredAlarmsTable"></div>
+                        </div>
+                    </div>
             </div>
         </div> 
 </section>
@@ -102,12 +124,15 @@
     var chosenAlarm;
     var createdAlarm;
     var deviceList = [];
+    var chosenEmailAlerts;
     //var labelList = [];
     var alarmList = [];
+    var triggeredAlarmsList = [];
     var chosenUser = "jwalstab";
 
     LoadDeviceSelectMenu();
     ChooseOperatorDropDownBox();
+    ChooseEmailNotificationDropDownBox();
     
     
     function AddAlarmButtonPress(){
@@ -115,18 +140,18 @@
     var chosenNumber = parseFloat(document.getElementById('alarmnumberinputbox').value);
 
     //checks to make sure all values are filled out
-    if (chosenDevice == null || chosenOperator == null || chosenValue == null || chosenName == null || chosenNumber == null)
+    if (chosenDevice == null || chosenOperator == null || chosenValue == null || chosenName == null || chosenNumber == null || chosenEmailAlerts == null)
     {
         console.log("if statement failed");
         DisplayResult("error","You have not filled out all required fields in order to create a new alarm")
     }
     else
     {
-                RegisterAlarmTodb(chosenUser,chosenDevice, chosenName, chosenValue, chosenOperator, chosenNumber)
+                RegisterAlarmTodb(chosenUser,chosenDevice, chosenName, chosenValue, chosenOperator, chosenNumber, chosenEmailAlerts)
     }
     }
 
-    function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber) {
+    function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber, chosenEmailAlerts) {
         
         createdAlarm = chosenName;
         var registerurl = masterURL + "/alarms/" + chosenUser + "/" + chosenDevice;
@@ -135,7 +160,8 @@
                 alarmName: chosenName,
                 alarmValue: chosenValue,
                 alarmOperator: chosenOperator,
-                alarmNumber: chosenNumber
+                alarmNumber: chosenNumber,
+                alarmEmailAlerts: chosenEmailAlerts
             };
         alarmList.forEach(element => {
             if (element == chosenName)
@@ -287,10 +313,18 @@
                 chosenDeviceName = element.devicename;
                 LoadDeviceLabelsMenu();
                 LoadTableDataFromAPI(chosenDevice);
+
+                //set title of the table
                 var alarmtitle = document.getElementById("alarmtitlearea");
                 while (alarmtitle.firstChild) {alarmtitle.removeChild(alarmtitle.firstChild);}
                 var alarmTitleWithName = $('<h2><strong>Viewing alarms for ' + chosenDeviceName + '</strong></h2>');
                 $('#alarmtitlearea').append(alarmTitleWithName);
+
+                //set title of triggered alarm area
+                var tAlarmtitle = document.getElementById("triggeredalarmtitlearea");
+                while (tAlarmtitle.firstChild) {tAlarmtitle.removeChild(tAlarmtitle.firstChild);}
+                var tAlarmTitleWithName = $('<h2><strong>Viewing triggered alarms for ' + chosenDeviceName + '</strong></h2>');
+                $('#triggeredalarmtitlearea').append(tAlarmTitleWithName);
             }
         });
     console.log(chosenDevice);
@@ -316,6 +350,23 @@
         var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
         chosenOperator = selectedvaluefromdropdownbox[0].innerText;
         console.log(chosenOperator);
+    });
+    }
+
+    function ChooseEmailNotificationDropDownBox(){
+    //adds code to change when device selected
+    $("#emailMenu li a").click(function(){
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        if (selectedvaluefromdropdownbox[0].innerText == "Email Alerts: ON")
+        {
+            chosenEmailAlerts = "On"
+        }
+        else{
+            chosenEmailAlerts = "Off"
+        }
+        console.log(chosenEmailAlerts);
     });
     }
 
@@ -361,7 +412,7 @@
     $('#responsebody').append(rbody);
     }
 
-    function crazytable(data){
+    function AlarmsTable(data){
         //main table creation, link to ext script
     var table = new Tabulator("#maintable", {
         pagination:"local",
@@ -375,13 +426,30 @@
     table.setData(data);
     }
 
+    function TriggeredAlarmsTable(data){
+        //main table creation, link to ext script
+    var table = new Tabulator("#triggeredAlarmsTable", {
+        pagination:"local",
+        paginationSize:10,
+        paginationSizeSelector:[10, 25, 50, 100, 250, 500, 1000],
+        autoColumns:true
+    });
+    data.forEach(element => {
+        delete element._id;
+    });
+    table.setData(data);
+    }
+
     function LoadTableDataFromAPI(chosenDevice) {
+
+        //load alarm setup table
+
         var urlstr = masterURL + "/alarmlist/" + chosenUser + "/" + chosenDevice;
         $.ajax({ type: "GET", url: urlstr, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
             success: function (data, status, jqXHR) {
                 if (data != null)
                 {
-                    crazytable(data);
+                    AlarmsTable(data);
                     alarmList = [];
                     $("#alarmMenu").empty();
                     data.forEach(element => {
@@ -394,6 +462,41 @@
                 else {console.log("EXPRESSED DATA NULL!")}},
             error: function (jqXHR, status) {console.log("ERROR");}
         });
+
+        //load triggered alarm table
+        var talarmURL = masterURL + "/triggeredalarmlist/" + chosenUser + "/" + chosenDevice;
+        $.ajax({ type: "GET", url: talarmURL, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
+            success: function (data, status, jqXHR) {
+                if (data != null)
+                {
+                    TriggeredAlarmsTable(data);
+                    triggeredAlarmsList = [];
+                    //$("#alarmMenu").empty();
+                    //data.forEach(element => {
+                    //    alarmList.push(element.alarmName);
+                    //    var newlink = $('<li><a data-value="action">' + element.alarmName + '</a></li>');
+                    //    $('#alarmMenu').append(newlink);
+                    //});
+                    //ChooseAlarmDropDownBox();
+                }
+                else {console.log("EXPRESSED DATA NULL!")}},
+            error: function (jqXHR, status) {console.log("ERROR");}
+        });
     }
     
+
+    function ClearTriggeredAlarms(){
+    var clearTriggeredAlarms = masterURL + "/deletetriggeredalarmlist/" + chosenUser + "/" + chosenDevice;
+        $.ajax({ type: "GET", url: clearTriggeredAlarms, contentType: "application/json; charset=utf-8", crossDomain: true,
+            success: function (data, status, jqXHR) {
+            LoadTableDataFromAPI();
+            console.log("triggered alarms cleared!");
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+                console.log(jqXHR);
+                console.log(status);
+            }
+        });
+}
 </script>

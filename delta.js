@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -104,7 +104,7 @@ app.get("/:username/lookup_devices", function(req, res) {
 app.post("/:deviceid", function(req, res) {
   iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
     res.send("Recieved:");
-    AlarmProcessor(req.params.deviceid,req.body,jwalstab);
+    AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
     res.end();
   });
 });
@@ -157,7 +157,7 @@ app.post("/:deviceid/betweendates", function(req, res) {
 //alarm tester
 app.get("/alarmtest", function(req, res) {
   var limitAmount = 1;
-  iotdb.collection('999').find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
+  iotdb.collection('55').find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
     if (err){console.log(err);}
     AlarmProcessor('55',docs[0],'jwalstab');
     res.send('ok!' + docs[0]);
@@ -191,6 +191,8 @@ app.post("/alarms/delete/:username/:deviceid/", function(req, res) {
 
 
 
+
+
 //returns list of alarms for that user and that device
 app.get("/alarmlist/:username/:deviceid", function(req,res) {
   alarmdb = outsideDatabase.db('alarms_' + req.params.username);
@@ -199,6 +201,43 @@ app.get("/alarmlist/:username/:deviceid", function(req,res) {
     res.end();
   });
 });
+
+//returns list of triggered alarms for that user and that device
+app.get("/triggeredalarmlist/:username/:deviceid", function(req,res) {
+  alarmdb = outsideDatabase.db('triggered_alarms_' + req.params.username);
+  alarmdb.collection(req.params.deviceid).find({}).toArray(function(err, triggeredAlarmsList){
+    res.send(triggeredAlarmsList);
+    res.end();
+  });
+});
+
+//deletes entire list of triggered alarms for one device
+app.get("/deletetriggeredalarmlist/:username/:deviceid", function(req, res) {
+  alarmdb = outsideDatabase.db('triggered_alarms_' + req.params.username);
+  alarmdb.collection(req.params.deviceid).deleteMany({}).then (function(err, triggeredAlarmsList){
+    res.send("OK!");
+    res.end();
+  });
+});
+
+//returns list of triggered bell alarms for that user and all devices
+app.get("/triggeredbellalarmlist/:username/", function(req,res) {
+  alarmdb = outsideDatabase.db('triggered_bell_alarms_' + req.params.username);
+  alarmdb.collection('all').find({}).toArray(function(err, triggeredBellAlarmsList){
+    res.send(triggeredBellAlarmsList);
+    res.end();
+  });
+});
+
+//deletes entire list of triggered bell alarms
+app.get("/deletebellalarms/:username/", function(req, res) {
+  bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + req.params.username);
+  bellTriggeredAlarmsDB.collection('all').deleteMany({}).then (function() {
+  });
+  res.send("ok!");
+  res.end();
+});
+
 
 ////////////////////////////////////////////////
 
@@ -235,12 +274,38 @@ function AlarmProcessor(deviceID, deviceData, username){
               {
                 deviceList.forEach(device => {if (device.deviceID == deviceID)
                   {
-                    SendEmail
-                    (device.devicename + "" + alarm.alarmName + " Alarm",
-                    "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
-                    "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
-                    + deviceValue + " with a value of (" + deviceData[deviceValue] +") was greater than the value of " 
-                    + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>")
+                    if(alarm.alarmEmailAlerts == "On")
+                    {
+                      SendEmail
+                      (device.devicename + "" + alarm.alarmName + " Alarm",
+                      "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
+                      "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
+                      + deviceValue + " with a value of (" + deviceData[deviceValue] +") was greater than the value of " 
+                      + alarm.alarmNumber +" at the local device time of " + deviceData.time + "</p>");
+                    }
+                    var alarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time
+                    }
+                    triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
+                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
+
+                    var bellAlarmRecord = {
+                      alarmName: alarm.alarmName,
+                      deviceValue: deviceValue,
+                      deviceValueNumber: deviceData[deviceValue],
+                      alarmOperator: alarm.alarmOperator,
+                      alarmNumber: alarm.alarmNumber,
+                      alarmTriggeredAt: deviceData.time,
+                      deviceName: device.devicename
+                    }
+
+                    bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + username);
+                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {console.log(alarmRecord);});
                   }
                 });
               });

@@ -58,20 +58,26 @@
                     </div>
                     <ul class="nav navbar-nav">
                         <li class="dropdown notifications">
-                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button"><i class="icon-bell"></i><span class="label-count">0</span></a>
+                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" onclick="LoadAlarmBell()" role="button"><i class="icon-bell"></i><span class="label-count" id="myspan">0</span></a>
                             <ul class="dropdown-menu">
-                                <li class="header">System Alerts</li>
-                                <li class="body">
+                                
+                                <li class="header" >Alarms Triggered</li>
+                                <li class="footer"> <a href="alarms"> Go To Alarms</a> </li>
+                                <li class="footer"> <a href="#" onclick="ClearList()"> Clear List</a> </li>
+                                <div id="bellMenu">
+
+                                </div>
+<!--                                 <li class="body">
                                             <a href="javascript:void(0);">
-                                                <div class="media">
+                                                <div class="media" >
                                                     <div class="media-body">
                                                         <span class="name">No Alerts<span class="time">LegioGuard Systems</span></span>
                                                         <span class="message">All systems operating normally</span>
                                                     </div>
                                                 </div>
                                             </a>
-                                </li>
-                                <li class="footer"> <a href="javascript:void(0);">View All</a> </li>
+                                </li> -->
+                                <!-- <li class="footer"> <a href="alarms">Go To Alarms Page</a> </li> -->
                             </ul>
                         </li>
                         <li class="dropdown profile">
@@ -179,3 +185,54 @@
     <%- body %>
 </body>
 </html>
+
+<script>
+function ClearList(){
+    var clearBellAlarmListURL = masterURL + "/deletebellalarms/jwalstab";
+        $.ajax({ type: "GET", url: clearBellAlarmListURL, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
+            success: function (data, status, jqXHR) {
+            console.log("alarm bell list cleared!");
+            //$("#bellMenu").empty();
+            LoadAlarmBell();
+
+            var alarmBellListToClear = document.getElementById("bellMenu");
+            while (alarmBellListToClear.firstChild) { alarmBellListToClear.removeChild(alarmBellListToClear.firstChild); }
+            },
+            error: function (jqXHR, status) {console.log("ERROR");}
+        });
+}
+LoadAlarmBell();
+function LoadAlarmBell(){
+    var alarmbellURL = masterURL + "/triggeredbellalarmlist/jwalstab/";
+        $.ajax({ type: "GET", url: alarmbellURL, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
+            success: function (data, status, jqXHR) {
+                if (data != null)
+                {
+                    var alarmBellListToClear = document.getElementById("bellMenu");
+                    while (alarmBellListToClear.firstChild) { alarmBellListToClear.removeChild(alarmBellListToClear.firstChild); }
+                    var bellCount = 0;
+                    data.forEach(element => {
+                        bellCount ++;
+                        var jsTime = new Date(element.alarmTriggeredAt);
+                        let hoursDiff = jsTime.getHours() + jsTime.getTimezoneOffset() / 60;
+                        let minutesDiff = (jsTime.getMinutes() + jsTime.getTimezoneOffset()) % 60;
+                        jsTime.setHours(hoursDiff + 1);
+                        jsTime.setMinutes(minutesDiff);
+                        var bellAlertTime = jsTime.toLocaleString();
+                        var newAlert = $('<li class="body"> <div class="media" id="bellMenu"> <div class="media-body"> <span class="name">' + element.deviceName + '<span class="time">' + bellAlertTime +'</span></span> <span class="message">' + element.alarmName + '</span> </div> </div> </li>');
+                        $('#bellMenu').append(newAlert);
+                    });
+                    document.getElementById("myspan").textContent=bellCount;
+                }
+                else {console.log("EXPRESSED DATA NULL!")}},
+            error: function (jqXHR, status) {console.log("ERROR");}
+        });
+}
+</script>
+
+
+
+
+                
+            
+        
