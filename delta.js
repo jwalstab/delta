@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -37,7 +37,7 @@ var transporter = nodemailer.createTransport({
 
 //SendEmail("test subject","<h1>hello</h1>");
 
-async function SendEmail(subjectToUse,htmlToUse){
+async function SendEmail(emailAddress,subjectToUse,htmlToUse){
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   //let testAccount = await nodemailer.createTestAccount();
@@ -47,7 +47,7 @@ async function SendEmail(subjectToUse,htmlToUse){
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: '"QTM Data Alarm System" <alarmsystem@quantumdata.com.au>', // sender address
-    to: "jaywalstab@outlook.com, jasonwalstab@qhealthcare.com.cn", // list of receivers
+    to: emailAddress, // list of receivers
     subject: subjectToUse, // Subject line
     //text: "Hello world?", // plain text body
     html: htmlToUse//"<b>Hello world?</b>" // html body
@@ -277,7 +277,7 @@ function AlarmProcessor(deviceID, deviceData, username){
                     if(alarm.alarmEmailAlerts == "On")
                     {
                       SendEmail
-                      (device.devicename + "" + alarm.alarmName + " Alarm",
+                      (alarm.alarmEmailAddress, device.devicename + "" + alarm.alarmName + " Alarm",
                       "<h1>" + alarm.alarmName + " Alarm Triggered for " + device.devicename +"</h1>" + 
                       "<p> The IoT device " + device.devicename + " has triggered the following alarm (" + alarm.alarmName +") as "  
                       + deviceValue + " with a value of (" + deviceData[deviceValue] +") was greater than the value of " 

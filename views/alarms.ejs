@@ -33,6 +33,9 @@
                     </div>
                     <div class="header">
                         <h2><strong>Add new alarm</strong></h2>
+                        <div class="form-group">
+                                <input type="text" id="alarmnameinputbox" class="form-control" placeholder="Name of alarm">
+                        </div>
                         <!--choose label dropdown-->
                         <div class="dropdown">
                             <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -58,9 +61,6 @@
                         <div class="form-group">
                                 <input type="text" id="alarmnumberinputbox" class="form-control" placeholder="Number to check agaisnt">
                         </div>
-                        <div class="form-group">
-                                <input type="text" id="alarmnameinputbox" class="form-control" placeholder="Name of alarm">
-                        </div>
                         <div class="dropdown">
                                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                   Email Alerts Options
@@ -70,6 +70,9 @@
                                 <li><a data-value="action">Email Alerts: ON</a></li>
                                 <li><a data-value="action">Email Alerts: OFF</a></li>
                                 </ul>
+                        </div>
+                        <div class="form-group">
+                                <input type="text" id="emailAddressInputBox" class="form-control" placeholder="Email Address">
                         </div>
                         <button class="btn btn-success" id="myButton" onclick="AddAlarmButtonPress()">Create new alarm</button>
                     </div>
@@ -138,6 +141,7 @@
     function AddAlarmButtonPress(){
     var chosenName = document.getElementById('alarmnameinputbox').value;
     var chosenNumber = parseFloat(document.getElementById('alarmnumberinputbox').value);
+    var chosenEmail = document.getElementById('emailAddressInputBox').value;
 
     //checks to make sure all values are filled out
     if (chosenDevice == null || chosenOperator == null || chosenValue == null || chosenName == null || chosenNumber == null || chosenEmailAlerts == null)
@@ -147,11 +151,11 @@
     }
     else
     {
-                RegisterAlarmTodb(chosenUser,chosenDevice, chosenName, chosenValue, chosenOperator, chosenNumber, chosenEmailAlerts)
+                RegisterAlarmTodb(chosenUser,chosenDevice, chosenName, chosenValue, chosenOperator, chosenNumber, chosenEmailAlerts,chosenEmail)
     }
     }
 
-    function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber, chosenEmailAlerts) {
+    function RegisterAlarmTodb(chosenUser,chosenDevice,chosenName,chosenValue,chosenOperator,chosenNumber, chosenEmailAlerts, chosenEmail) {
         
         createdAlarm = chosenName;
         var registerurl = masterURL + "/alarms/" + chosenUser + "/" + chosenDevice;
@@ -161,7 +165,8 @@
                 alarmValue: chosenValue,
                 alarmOperator: chosenOperator,
                 alarmNumber: chosenNumber,
-                alarmEmailAlerts: chosenEmailAlerts
+                alarmEmailAlerts: chosenEmailAlerts,
+                alarmEmailAddress: chosenEmail
             };
         alarmList.forEach(element => {
             if (element == chosenName)
