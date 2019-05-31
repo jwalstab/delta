@@ -201,7 +201,14 @@ function ClearList(){
             error: function (jqXHR, status) {console.log("ERROR");}
         });
 }
-setTimeout(LoadAlarmBell, 10000);
+
+
+BellUpdater();
+
+function BellUpdater(){
+    LoadAlarmBell();
+    setTimeout(BellUpdater, 10000);
+}
 function LoadAlarmBell(){
     var alarmbellURL = masterURL + "/triggeredbellalarmlist/jwalstab/";
         $.ajax({ type: "GET", url: alarmbellURL, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json",
