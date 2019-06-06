@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -189,9 +189,18 @@ app.post("/alarms/delete/:username/:deviceid/", function(req, res) {
   });
 });
 
-
-
-
+//delete a device based of req.body
+app.post("/devices/delete/:username/", function(req, res) {
+  deviceDB = outsideDatabase.db('devices');
+  var name = "deviceID";
+  var value = (req.body.deviceID);
+  var query = {};
+  query[name] = value;
+  deviceDB.collection(req.params.username).deleteOne(req.body).then (function() {
+    res.send("Recieved");
+    res.end();
+  });
+});
 
 //returns list of alarms for that user and that device
 app.get("/alarmlist/:username/:deviceid", function(req,res) {
@@ -437,6 +446,11 @@ app.get("/monitor", function(req, res) {
 app.get("/data_tables", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
   res.render('data_tables');
+});
+
+app.get("/devices", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('devices');
 });
 
 app.get("/data_charts", function(req, res) {

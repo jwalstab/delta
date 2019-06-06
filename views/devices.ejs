@@ -1,0 +1,300 @@
+<section class="content">
+        <div class="container">
+            <div class="row clearfix">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="body block-header">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <h2>IoT Device Management</h2>
+                                    <ul class="breadcrumb" id="responsebody">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Inline Layout -->
+            <!-- VIEW ALARMS SECTION-->
+            <div class="row clearfix">
+                <div class="col-lg-3 col-sm-12">
+                    <div class="card">
+                        <div class="header">
+                            <h2><strong>Add new device</strong></h2>
+                            <div class="form-group">
+                                    <input type="number" id="deviceIDInputBox" class="form-control" placeholder="Device Broadcast ID">
+                            </div>
+                            <div class="form-group">
+                                    <input type="text" id="deviceNameInputBox" class="form-control" placeholder="Device Name">
+                            </div>
+                            <button class="btn btn-success" id="addDeviceButton" onclick="PreRegisterCheckPrep()">Add new device</button>
+                        </div>
+                        <div class="header">
+                                <h2><strong>Remove a Device</strong></h2>
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        Select Device
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="removeDeviceSelectMenu">
+                                    </ul>
+                                </div>
+                                <button class="btn btn-danger" id="myButton" onclick="RemoveDeviceButtonPress()">Remove device</button>
+                        </div>
+                        <div class="header">
+                                <h2><strong>IoT List</strong></h2>
+                                <button class="btn btn-success" id="refreshListButton" onclick="LoadDeviceDataForTable()">Refresh list</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-9">
+                    <div class="card">
+                        <div class="header" id="deviceTitleArea">
+                            <h2><strong>Loading IoT Devices...</strong></h2>
+                        </div>
+                        <div class="body">
+                            <div id="deviceTable">
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+    </section>
+
+<script>
+    LoadDeviceRemoveSelectBoxAndDeviceList();
+    var table;
+    var id;
+    var idstring;
+    var name;
+    var loggedonuser = "jwalstab";
+    var chosenDevice;
+    var chosenDeviceName;
+    var deviceList = [];
+    var deviceIDandNameObjectsList = [];
+    
+    var completeDeviceObjectList = [];
+
+    function PreRegisterCheckPrep(){
+
+        idstring = document.getElementById('deviceIDInputBox').value;
+        name = document.getElementById('deviceNameInputBox').value;
+        id = parseInt(idstring);
+
+        console.log(id);
+        console.log(name);
+
+        if (idstring != "" && name != "" && id != null)
+        {
+            var lookupurl = masterURL + "/" + loggedonuser + "/lookup_devices/"
+            $.ajax({type: "GET", url: lookupurl, contentType: "application/json; charset=utf-8", crossDomain: true, dataType: "json", 
+            success: function (data, status, jqXHR) {
+                    var exists = false;
+                    data.forEach(element => {
+                        if (element.deviceID == id || element.devicename == name)
+                        {
+                            exists = true;
+                        }
+                    });
+                    if (exists == true){DisplayResult("exists");}
+                    else{RegisterToDB(id,name,loggedonuser);}
+                },
+                error: function (jqXHR, status) {
+                    console.log(jqXHR, status);
+                    DisplayResult("error",jqXHR)
+                }
+            });
+        }
+        else
+        {
+            DisplayResult("error", "You must set both a device broadcast ID and a name before adding a new device")
+        }
+    }
+
+    function RegisterToDB(id,name,loggedonuser) {
+        var objtopost = {
+                deviceID: id,
+                devicename: name
+            };
+        var registerurl = masterURL + "/" + loggedonuser + "/register_device/"
+        $.ajax({
+            type: "POST",
+            url: registerurl,
+            data: JSON.stringify(objtopost),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                DisplayResult("added");
+                $("#removeDeviceSelectMenu").empty(); 
+                LoadDeviceRemoveSelectBoxAndDeviceList();
+            },
+            error: function (jqXHR, status) {
+                DisplayResult("error",jqXHR);
+            }
+        });
+    }
+
+    function DisplayResult(result, errdetails){
+
+    //clear the header and body of results
+    var myNode2 = document.getElementById("responsebody");
+    while (myNode2.firstChild) {
+    myNode2.removeChild(myNode2.firstChild);
+    }
+
+    if (result == "added")
+    {
+        var rbody = $('<p>Your device '+ name + ' for device ID' + idstring + ' was sucessfully created </p>');
+    }
+    if (result == "removed")
+    {
+        var rbody = $('<p>Your alarm '+ name +' for device ' + chosenDeviceName + ' was sucessfully removed </p>');
+    }
+    if (result == "exists")
+    {
+        var rbody = $('<p>The device name '+ name +' for device ID ' + id + ' was not able to be created because the device name of ' + name + ' is already in use</p>');
+    }
+    if (result == "error")
+    {
+        var rbody = $('<p>Your device was not created due to the following error: ' + errdetails + '</p>');
+    }
+    if (result == "removeerror")
+    {
+        var rbody = $('<p>Your device was not removed due to the following error: ' + errdetails + '</p>');
+    }
+    $('#responsebody').append(rbody);
+    }
+
+    function LoadDeviceRemoveSelectBoxAndDeviceList(){
+        var dropboxURL = masterURL + "/jwalstab/lookup_devices/";
+        $.ajax({type: "GET", url: dropboxURL, contentType: "application/json; charset=utf-8", crossDomain: true,  dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu and populates device list
+                deviceList = [];
+                deviceIDandNameObjectsList = [];
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#removeDeviceSelectMenu').append(newlink);
+                    deviceList.push(element);
+                    var deviceObject = {
+                        deviceName: element.devicename,
+                        deviceID: element.deviceID
+                    }
+                    deviceIDandNameObjectsList.push(deviceObject);
+                });
+                LoadDeviceDataForTable();
+                //adds code to change when device selected
+                $("#removeDeviceSelectMenu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    deviceList.forEach(element => {
+                        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+                        {
+                            chosenDevice = element.deviceID;
+                            chosenDeviceName = element.devicename;
+                        }
+                    });
+                    console.log(chosenDevice);
+                    });
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+
+    function RemoveDeviceButtonPress()
+        {
+            var deleteDeviceURL = masterURL + "/devices/delete/" + loggedonuser;
+                    
+            var deviceToDelete = {
+                    deviceID: chosenDevice
+                };
+    
+            var check = JSON.stringify(deviceToDelete);
+            console.log(check);
+            console.log(chosenDevice + "removed!");
+            $.ajax({type: "POST", url: deleteDeviceURL, data: JSON.stringify(deviceToDelete), contentType: "application/json; charset=utf-8", crossDomain: true,
+                success: function (data, status, jqXHR) {
+                    DisplayResult("removed"); 
+                    $("#removeDeviceSelectMenu").empty(); 
+                    LoadDeviceRemoveSelectBoxAndDeviceList();
+                },
+                error: function (jqXHR, status) {DisplayResult("removeerror",jqXHR);}
+            });
+        }
+    
+    function LoadDeviceDataForTable(){
+            completeDeviceObjectList = [];
+            var counter = 0;
+            deviceIDandNameObjectsList.forEach(element => {
+                var lastContactedURL = masterURL + "/" + element.deviceID + "/last/1";
+                $.ajax({type: "GET", url: lastContactedURL, contentType: "application/json; charset=utf-8", crossDomain: true,  dataType: "json",
+                success: function (data, status, jqXHR) {
+                    if (data[0] != null)
+                    {
+/*                         var jsTime = new Date(data[0].time);
+                        let hoursDiff = jsTime.getHours() + jsTime.getTimezoneOffset() / 60;
+                        let minutesDiff = (jsTime.getMinutes() + jsTime.getTimezoneOffset()) % 60;
+                        jsTime.setHours(hoursDiff + 1);
+                        jsTime.setMinutes(minutesDiff);
+                        var lastContactedTime = jsTime.toLocaleString(); */
+                        var timestamp = data[0]._id.toString().substring(0,8);
+                        var idTime = new Date( parseInt( timestamp, 16 ) * 1000 )
+                        console.log(timestamp);
+                        console.log(idTime);
+
+                        counter++;
+                        console.log("OK!");
+                        deviceCompleteObject = {
+                        Device_Name: element.deviceName,
+                        Device_ID: element.deviceID,
+                        Last_Data_Recieved_At: idTime
+                        }
+                        completeDeviceObjectList.push(deviceCompleteObject);
+                    }
+                    else
+                    {
+                        counter++;
+                        console.log("null!");
+                        deviceCompleteObject = {
+                        Device_Name: element.deviceName,
+                        Device_ID: element.deviceID,
+                        Last_Data_Recieved_At: "No Data has ever been recieved for this device"
+                        }
+                        completeDeviceObjectList.push(deviceCompleteObject);
+                    }
+                    if (counter == deviceIDandNameObjectsList.length)
+                    {
+                        var refreshTime = new Date().toLocaleString();
+                        console.log(counter + deviceIDandNameObjectsList.length);
+                        var alarmtitle = document.getElementById("deviceTitleArea");
+                        while (alarmtitle.firstChild) {alarmtitle.removeChild(alarmtitle.firstChild);}
+                        var alarmTitleWithName = $('<h2><strong>IoT Device List as of ' + refreshTime + '</strong></h2>');
+                        $('#deviceTitleArea').append(alarmTitleWithName);
+                        UpdateDeviceTable();
+                    }
+                },
+                error: function (jqXHR, status) {
+                    console.log("ERROR");
+                }
+            });
+            });
+    }
+
+    function UpdateDeviceTable(){
+        var table = new Tabulator("#deviceTable", {
+        pagination:"local",
+        paginationSize:10,
+        paginationSizeSelector:[10, 25, 50, 100, 250, 500, 1000],
+        autoColumns:true
+    });
+    table.setData(completeDeviceObjectList);
+}
+
+</script>
+

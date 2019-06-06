@@ -1,0 +1,304 @@
+<link href="assets/scroll.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<section class="content">
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body block-header">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <h2>RealTime IoT Device Monitor</h2>
+                                <ul class="breadcrumb p-l-0 p-b-0 ">
+                                    <li class="breadcrumb-item active">Select an IoT device to monitor incoming data in realtime</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="col-lg-12 col-md-12">
+                    <div class="card">
+                        <div class="header" id="rheader">
+                            <h2><strong>Loading chart...</strong></h2>
+                            <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                      Select Device
+                                      <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="deviceSelectMenu">
+                                    </ul>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="body">
+                                <div id="chart">
+                                </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script>
+
+    LoadDeviceSelectBox();
+    GetDataFromAPI();
+
+    var chosenDevice;
+    var chart;
+    var firstChartLoad = true;
+    var pullAmount;
+
+    function LoadDeviceSelectBox(){
+        var dropboxURL = masterURL + "/jwalstab/lookup_devices/";
+        $.ajax({type: "GET", url: dropboxURL, contentType: "application/json; charset=utf-8", crossDomain: true,  dataType: "json",
+            success: function (data, status, jqXHR) {
+                //creates the links in the dropdown menu and populates device list
+                deviceList = [];
+                data.forEach(element => {
+                    var newlink = $('<li><a href="#" data-value="action">' + element.devicename + '</a></li>');
+                    $('#deviceSelectMenu').append(newlink);
+                    deviceList.push(element);
+                });
+
+                //adds code to change when device selected
+                $("#deviceSelectMenu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    deviceList.forEach(element => {
+                        if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
+                        {
+                            chosenDevice = element.deviceID;
+                            chosenDeviceName = element.devicename;
+                        }
+                    });
+                    console.log(chosenDevice);
+                    });
+            },
+            error: function (jqXHR, status) {
+                console.log("ERROR");
+            }
+        });
+    }
+
+    function GetDataFromAPI(){
+        if (firstChartLoad == true){ pullAmount = 20}
+        else{
+            pullAmount = 1;
+        }
+        if (chosenDevice != null){
+            var lastDataURL = masterURL + "/" + chosenDevice + "/last/" + pullAmount;
+            $.ajax({
+            type: "GET",
+            url: lastDataURL,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                console.log(data);
+                if (firstChartLoad == true){
+                    console.log("FIRST!");
+                    firstChartLoad = false;
+                    CreateChartAndLabels(data);
+                }
+                else{
+                    UpdateChartData(data);
+                }
+            },
+            error: function (jqXHR, status) {
+                console.log("jqXHYR:" + jqXHR + "status:" + status)
+            }
+        });
+        }
+        else
+        {
+            console.log("No device selected!");
+        }
+    setTimeout(GetDataFromAPI, 10000);
+    }
+
+    function AppendSeriesToChart(seriesName, seriesData){
+        chart.appendSeries({
+        name: seriesName,
+        data: seriesData
+    });
+    //chart.toggleSeries(seriesName);
+    }
+
+    function CreateChartAndLabels(data){
+    if (data[0] != null)
+            {
+                var keyNames = [];
+                var getLabelsSmall = Object.keys(data[0]);
+                getLabelsSmall.forEach(element => { //gets labels for buttons
+                    if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                    }
+                    else
+                    {
+                    keyNames.push(element);
+                    }
+                });
+                var firstTime = true;
+                var lastKeyCounter = 0;
+                keyNames.forEach(propname => {
+                    lastKeyCounter ++;
+                    var DataToPush = [];
+                    data.forEach(globalpiece => {
+                        if (globalpiece[propname] != null)
+                            {
+                                if (typeof globalpiece[propname] === "boolean"){
+                                    if (globalpiece[propname] == true)
+                                    {
+                                        globalpiece[propname] = 100;
+                                    }
+                                    else
+                                    {
+                                        (globalpiece[propname] = 1);
+                                    }
+                                }
+                                var miniArray = [];
+                                miniArray.push(globalpiece.time, globalpiece[propname]);
+                                DataToPush.push(miniArray);
+                                }
+                    });
+                    if (firstTime == true)
+                    {
+                        var chartOptions = {
+                            chart: {
+                                type: 'area',
+                                stacked: false,
+                                height: 550,
+                                zoom: {
+                                type: 'x',
+                                enabled: true
+                                },
+                                toolbar: {
+                                autoSelected: 'zoom'
+                                }
+                            },
+                            dataLabels: {
+                                enabled: false
+                            },
+                            series: [{
+                                name: propname,
+                                data: DataToPush
+                            }],
+                            markers: {
+                                size: 0,
+                            },
+                            title: {
+                                text: ' ',
+                                align: 'left'
+                            },
+                            fill: {
+                                type: 'gradient',
+                                gradient: {
+                                shadeIntensity: 1,
+                                inverseColors: false,
+                                opacityFrom: 0.5,
+                                opacityTo: 0,
+                                stops: [0, 90, 100]
+                                },
+                            },
+                            yaxis: {
+                                tickAmount: 4,
+                                min: 0
+                                },
+                            xaxis: {
+                                type: 'datetime',
+                            },
+                            tooltip: {
+                                enabled: true,
+                                shared: true,
+                                x: {
+                                format: "dd MMM yyyy HH:mm:ss"
+                                    }
+                                }
+                            }
+                        if (chart != null)
+                        {
+                            chart.destroy();
+                        }
+                        chart = new ApexCharts(document.querySelector("#chart"), chartOptions);
+                        chart.render();
+                        firstTime = false;
+                        //chart.toggleSeries(propname);
+                    }
+                    else{
+                    AppendSeriesToChart(propname,DataToPush);
+                    }
+                    if (lastKeyCounter == keyNames.length)
+                    {
+                        keyNames.forEach(propName => {
+                            //chart.toggleSeries(propName);
+                        });
+                    }
+                });
+            }
+    }
+
+    function UpdateChartData(dataAPI){
+    if (dataAPI[0] != null)
+            {
+                var count11 = 0;
+                var keyNames = [];
+                var getLabelsSmall = Object.keys(dataAPI[0]);
+                getLabelsSmall.forEach(element => { //gets labels for buttons
+                    if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                    }
+                    else
+                    {
+                    keyNames.push(element);
+                    }
+                });
+                var firstTime = true;
+                var lastKeyCounter = 0;
+                var masterDataArray = [];
+                keyNames.forEach(propname => {
+                    lastKeyCounter ++;
+                    var DataToPush = [];
+                    dataAPI.forEach(globalpiece => {
+                        if (globalpiece[propname] != null)
+                        {
+                            if (typeof globalpiece[propname] === "boolean"){
+                                if (globalpiece[propname] == true)
+                                {
+                                    globalpiece[propname] = 100;
+                                }
+                                else
+                                {
+                                    (globalpiece[propname] = 1);
+                                }
+                            }
+                            var miniArray = [];
+                            miniArray.push(globalpiece.time, globalpiece[propname]);
+                            DataToPush.push(miniArray);
+                        }
+                    });
+                    console.log(DataToPush);
+                    var bla1 = {
+                        data: DataToPush
+                    }
+                    if (count11 == 0){
+                        count11 ++;
+                        masterDataArray.push(bla1);
+                    }              
+                });
+                //console.log(masterDataArray);
+                chart.appendData(masterDataArray);
+/*                 chart.appendData([{
+                    data: [323, 424, 311, 421, 221]
+                            }, {
+                    data: [122, 111, 324, 441, 325]
+                }]) */
+            }
+    }
+</script>
+
