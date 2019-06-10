@@ -54,15 +54,13 @@
 <script>
 
     LoadDeviceSelectBox();
-
+    GetDataFromAPI();
     var chosenDevice;
     var chart;
     var firstChartLoad = true;
     var pullAmount;
     var deviceChanged;
-    var sizer;
-    var magicNumber = 20;
-    var countingMagic = 0;
+    var keyNames = [];
 
     function LoadDeviceSelectBox(){
         var dropboxURL = masterURL + "/jwalstab/lookup_devices/";
@@ -90,47 +88,28 @@
                     });
                     console.log(chosenDevice);
                     deviceChanged = true;
-                    DataUpdate();
+                    DisplayResult("loading");
                     });
             },
             error: function (jqXHR, status) {
                 console.log("ERROR");
             }
         });
-    }    
-    function GetFirstData(){
-            var lastDataURL = masterURL + "/" + chosenDevice + "/monitorgraphstart/" + magicNumber;
-            $.ajax({
-            type: "GET",
-            url: lastDataURL,
-            contentType: "application/json; charset=utf-8",
-            crossDomain: true,
-            dataType: "json",
-            success: function (data, status, jqXHR) {
-                sizer = data.length;
-                data.forEach(element => {
-                    chart1.addSeries(element);
-                });
-                magicNumber = magicNumber - 1;
-                DataUpdate();
-            },
-            error: function (jqXHR, status) {
-                console.log("jqXHYR:" + jqXHR + "status:" + status)
-            }
-        });
     }
-    function DataUpdate(){
-            if (deviceChanged == true)
-            {
+
+    function GetDataFromAPI(){
+        if (firstChartLoad == true){ pullAmount = 3}
+        else{
+            pullAmount = 1;
+        }
+        if (chosenDevice != null){
+            //CHECKS IF THERES A DEVICE CHANGE, DELETES AND RELOADS PLOT
+            if (deviceChanged == true){
+                firstChartLoad = true;
+                //delete and create new chart here
                 deviceChanged = false;
-/*                 for (let index = 0; index < sizer; index++) {
-                    chart1.series[index].remove();
-                } */
-                GetFirstData();
-                return;
             }
-            var lastDataURL = masterURL + "/" + chosenDevice + "/monitorgraphupdate/" + magicNumber;
-            console.log(magicNumber);
+            var lastDataURL = masterURL + "/" + chosenDevice + "/last/" + pullAmount;
             $.ajax({
             type: "GET",
             url: lastDataURL,
@@ -138,38 +117,147 @@
             crossDomain: true,
             dataType: "json",
             success: function (data, status, jqXHR) {
-                if (magicNumber === 1)
-                {
-                    var dt = new Date();
-                    var dtl = dt.toLocaleString();
-                    chart1.setTitle({text: "Now monitoring " + chosenDeviceName + ". Last data recieved at :" + dtl});
-                    setTimeout(DataUpdate, 2000);
-                    console.log("INIT FINISHED!");
+                if (firstChartLoad == true){
+                    console.log("FIRST!");
+                    firstChartLoad = false;
+                    var c = false;
+                    data.forEach(element => {
+                        if (c === false){
+                            UpdateChart(element,true);
+                            c = true;
+                        }
+                        else{
+                            UpdateChart(element,false);
+                        }
+                        
+                    });
                 }
                 else{
-                    countingMagic++;
-                    var magicPercentage = countingMagic / 40 * 100;
-                    chart1.setTitle({text: "Loading data for " + chosenDeviceName + " - %" + magicPercentage});
-                    magicNumber = magicNumber - 1;
-                    DataUpdate();
-                }
-                for (let index = 0; index < sizer; index++) {
-                    chart1.series[index].addPoint(data[index]);
+                    DisplayResult("loaded");
+                    UpdateChart(data,false);
                 }
             },
             error: function (jqXHR, status) {
                 console.log("jqXHYR:" + jqXHR + "status:" + status)
             }
         });
+        }
+        else
+        {
+            console.log("No device selected!");
+        }
+    setTimeout(GetDataFromAPI, 10000);
     }
+
+    function UpdateChart(data,firstTimeToLoad,dataNumber){
+    if (data != null)
+            {
+                if (firstTimeToLoad == true){
+                    keyNames = [];
+                    var getLabelsSmall = Object.keys(data);
+                    getLabelsSmall.forEach(element => { //gets labels for buttons
+                        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+                        }
+                        else
+                        {
+                        keyNames.push(element);
+                        }
+                    });
+                }
+                var collectingTime = true;
+                var xArray = [];
+                keyCounter = 0;
+                keyNames.forEach(propname => {
+                    var isABool = false;
+                    var boolArray = [];
+                    var DataToPush = [];
+                    var yArray = [];
+                    if (data[propname] != null)
+                            {
+                                if (typeof data[propname] === "boolean"){
+                                    isABool = true;
+                                    if (data[propname] == true)
+                                    {
+                                        data[propname] = 20;
+                                        boolArray.push("On");
+                                    }
+                                    else
+                                    {
+                                        (data[propname] = -20);
+                                        boolArray.push("Off");
+                                    }
+                                }
+                                var miniArray = [];
+                                var timeS = new Date(data.time);
+                                var timeSR = timeS.getTime();
+                                miniArray.push(timeSR, data[propname]);
+                                yArray.push(miniArray);
+                                //if (collectingTime == true){xArray.push(globalpiece.time);}
+                                }
+                    
+                    //if (collectingTime == true){collectingTime = false;}
+                    if (isABool == false){
+                        var ploatLoadData = {
+                            type: 'area',
+                            name: propname,
+                            data: yArray,
+                            visible: false
+                        };
+                    }
+                    else{
+                        var ploatLoadData = {
+                            type: 'area',
+                            name: propname,
+                            data: yArray,
+                            visible: false
+                        };
+                    }
+                    if (firstTimeToLoad == true){chart1.addSeries(ploatLoadData)}
+                    else{
+                        console.log("B");
+                        if (isABool == true){
+                            console.log(yArray);
+                            chart1.series[keyCounter].addPoint(yArray[0]);
+                        }
+                            else{
+                                console.log(yArray);
+                                chart1.series[keyCounter].addPoint(yArray[0]);
+                            }
+                            console.log("e");
+                            keyCounter++;  
+                    }
+                });
+            }
+    }
+
+    function DisplayResult(result, errdetails){
+        //clear the header and body of results
+        var myNode2 = document.getElementById("responsebody");
+        while (myNode2.firstChild) {
+        myNode2.removeChild(myNode2.firstChild);
+        }
+
+        if (result == "loading")
+        {
+            var rbody = $('<p>Now loading realtime monitoring for the IoT device ' + chosenDeviceName + '</p>');
+        }
+        if (result == "loaded")
+        {
+            var dt = new Date();
+            var dtl = dt.toLocaleString();
+            var rbody = $('<p>Currently monitoring IoT device ' + chosenDeviceName + ', last data recieved at '+ dtl +'</p>');
+        }
+        $('#responsebody').append(rbody);
+        }
     
     var datat = [[1167609600000,0.7537], [1167696000000,0.7537]]
+
     var chart1 = Highcharts.chart('container', {
             chart: {
                 zoomType: 'x'
             },
             title: {
-                text: 'Select an IoT device from the menu to begin monitoring'
+                text: 'SensorValues'
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
@@ -180,22 +268,12 @@
             },
             yAxis: {
                 title: {
-                    text: 'Quantum Data Technologies'
+                    text: 'Exchange rate'
                 }
             },
             legend: {
-                align: 'right',
-                verticalAlign: 'top',
-                layout: 'vertical',
-                x: 0,
-                y: 100
+                enabled: true
             },
-            tooltip: {
-                    xDateFormat: '%d/%m/%Y',
-                    shared: true,
-                    split: false,
-                    enabled: true
-                },
             plotOptions: {
 /*                 line: {
                     dataLabels: {
@@ -217,13 +295,7 @@
                         ]
                     },
                     marker: {
-                        enabled: false,
-                        states: {
-                        hover: {
-                            enabled: true,
-                            radius: 3
-                        }
-                    }
+                        radius: 2
                     },
                     lineWidth: 1,
                     states: {
@@ -243,5 +315,37 @@
         });
 
     chart1.series[0].remove();
+/*         chart.addSeries({
+            data: [194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4]
+        }); */
+
+    //chart1.series[0].addPoint(  [5, dateNow]  );
+
+
+/*         document.addEventListener('DOMContentLoaded', function () {
+        var myChart = Highcharts.chart('container', {
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Fruit Consumption'
+        },
+        xAxis: {
+            categories: ['Apples', 'Bananas', 'Oranges']
+        },
+        yAxis: {
+            title: {
+                text: 'Fruit eaten'
+            }
+        },
+        series: [{
+            name: 'Jane',
+            data: [1, 0, 4]
+        }, {
+            name: 'John',
+            data: [5, 7, 3]
+        }]
+    }); */
+/* }); */
 </script>
 

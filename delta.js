@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -550,6 +550,159 @@ res.end();
     devicedb.collection(req.params.username).find(query).toArray(function(err, docs){
     if (docs[0] == null) {console.log("A!");}
     res.send(docs);
+    res.end();
+  });
+}); */
+
+
+//graph API 
+
+//retrieve last known data with a packet amount
+app.get("/:deviceid/getmonitorlabels", function(req, res) {
+  var limitAmount = 1;
+  iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
+    keyNames = [];
+    var getLabelsSmall = Object.keys(docs[0]);
+    getLabelsSmall.forEach(element => { //gets labels for buttons
+        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+        }
+        else
+        {
+        keyNames.push(element);
+        }
+    });
+    res.send(keyNames);
+    res.end();
+  });
+});
+
+
+//retrieve last known data with a packet amount
+app.get("/:deviceid/monitorgraphstart/:number", function(req, res) {
+  var getAmount = parseInt(req.params.number);
+  var limitAmount = getAmount - 1;
+  iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(getAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
+    keyNames = [];
+    var objectArray = [];
+    var returnArray = [];
+    var getLabelsSmall = Object.keys(docs[limitAmount]);
+    getLabelsSmall.forEach(element => { //gets labels for buttons
+        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+        }
+        else
+        {
+        keyNames.push(element);
+        }
+    });
+    keyNames.forEach(propname => {
+      var isABool = false;
+      if (typeof docs[limitAmount][propname] === "boolean")
+      {
+        isABool = true;
+        if (docs[limitAmount][propname] == true)
+        {
+            docs[limitAmount][propname] = 20;
+        }
+        else
+        {
+            (docs[limitAmount][propname] = -20);
+        }
+      }
+      var miniArray = [];
+      var timeS = new Date(docs[limitAmount].time);
+      var timeSR = timeS.getTime();
+      miniArray.push(timeSR, docs[limitAmount][propname]);
+      returnArray.push(miniArray);
+      if (isABool == false){
+        var returnData = {
+          type: 'line',
+          name: propname,
+          data: returnArray,
+          visible: false};
+          objectArray.push(returnData);
+        }
+      else{
+        var returnData = {
+          type: 'column',
+          name: propname,
+          data: returnArray,
+          visible: false};
+          objectArray.push(returnData);
+          console.log(returnData);
+        }
+    });
+    res.send(objectArray);
+    res.end();
+  });
+});
+
+//retrieve last known data with a packet amount
+app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
+  var getAmount = parseInt(req.params.number);
+  var limitAmount = getAmount - 1;
+  console.log(limitAmount);
+  iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(getAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
+    keyNames = [];
+    var returnArray = [];
+    var getLabelsSmall = Object.keys(docs[limitAmount]);
+    getLabelsSmall.forEach(element => { //gets labels for buttons
+        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+        }
+        else
+        {
+        keyNames.push(element);
+        }
+    });
+    keyNames.forEach(propname => {
+      if (typeof docs[limitAmount][propname] === "boolean")
+      {
+        if (docs[limitAmount][propname] == true)
+        {
+            docs[limitAmount][propname] = 20;
+        }
+        else
+        {
+            (docs[limitAmount][propname] = -20);
+        }
+      }
+      var miniArray = [];
+      var timeS = new Date(docs[limitAmount].time);
+      var timeSR = timeS.getTime();
+      miniArray.push(timeSR, docs[limitAmount][propname]);
+      returnArray.push(miniArray);
+    });
+  res.send(returnArray);
+  res.end();
+  });
+});
+
+
+
+
+/* 
+app.get("/:deviceid/monitorgraphstart/:number", function(req, res) {
+  var limitAmount = parseInt(req.params.number);
+  iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
+    console.log(docs);
+    console.log(docs[req.params.number - 1]);
+    res.send(docs[req.params.number - 1]);
+    res.end();
+  });
+});
+
+
+//retrieve last known data with a packet amount
+app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
+  var limitAmount = parseInt(req.params.number);
+  iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(limitAmount).toArray(function(err, docs){
+    if (err){console.log(err);}
+    console.log(docs);
+    console.log(docs[req.params.number - 1]);
+    res.send(docs[req.params.number - 1]);
     res.end();
   });
 }); */
