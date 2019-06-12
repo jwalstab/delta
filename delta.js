@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -433,7 +433,7 @@ app.set('view engine', 'ejs');
 
 app.get('/public/assets/images/favico.ico' , function(req , res){/*code*/});
 
-app.get("/", function(req, res) {
+app.get("/index", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
   res.render('index');
 });
@@ -442,6 +442,12 @@ app.get("/monitor", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
   res.render('monitor');
 });
+
+app.get("/", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('login', { layout: 'loginlayout' });
+});
+
 
 app.get("/data_tables", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
@@ -584,6 +590,13 @@ app.get("/:deviceid/monitorgraphstart/:number", function(req, res) {
   var limitAmount = getAmount - 1;
   iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(getAmount).toArray(function(err, docs){
     if (err){console.log(err);}
+    if (docs[0] == undefined){ //checks to make sure the iot device has actual data, if not returns
+      console.log("was undefined");
+      res.send("Null");
+      res.end();
+      return;
+    }
+    console.log("fired anyway");
     keyNames = [];
     var objectArray = [];
     var returnArray = [];
@@ -620,6 +633,7 @@ app.get("/:deviceid/monitorgraphstart/:number", function(req, res) {
           type: 'line',
           name: propname,
           data: returnArray,
+          marker: {symbol : 'square', radius : 2 },
           visible: false};
           objectArray.push(returnData);
         }
@@ -628,6 +642,7 @@ app.get("/:deviceid/monitorgraphstart/:number", function(req, res) {
           type: 'column',
           name: propname,
           data: returnArray,
+          marker: {symbol : 'square', radius : 2 },
           visible: false};
           objectArray.push(returnData);
           console.log(returnData);
@@ -645,6 +660,12 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
   console.log(limitAmount);
   iotdb.collection(req.params.deviceid).find({}).sort( { _id : -1 } ).limit(getAmount).toArray(function(err, docs){
     if (err){console.log(err);}
+    if (docs[0] == undefined){ //checks to make sure the iot device has actual data, if not returns
+      console.log("was undefined");
+      res.send("Null");
+      res.end();
+      return;
+    }
     keyNames = [];
     var returnArray = [];
     var getLabelsSmall = Object.keys(docs[limitAmount]);

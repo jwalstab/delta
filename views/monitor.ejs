@@ -1,8 +1,8 @@
 <link href="assets/scroll.css" rel="stylesheet">
-
+<!-- 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
 
 <script type="text/javascript" src="assets/highcharts.js"></script>
 
@@ -14,9 +14,9 @@
                     <div class="body block-header">
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <h2>RealTime IoT Device Monitor</h2>
+                                <h2>Real Time IoT Device Monitor</h2>
                                 <ul class="breadcrumb p-l-0 p-b-0" id="responsebody">
-                                    <li class="breadcrumb-item active">Select an IoT device to monitor incoming data in realtime</li>
+                                    <li class="breadcrumb-item active">Select an IoT device to monitor incoming data in real time</li>
                                 </ul>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
 <script>
 
     LoadDeviceSelectBox();
-
+    var chosenDeviceBox;
     var chosenDevice;
     var chart;
     var firstChartLoad = true;
@@ -63,6 +63,8 @@
     var sizer;
     var magicNumber = 20;
     var countingMagic = 0;
+
+    var dataUpdateTimeout;
 
     function LoadDeviceSelectBox(){
         var dropboxURL = masterURL + "/jwalstab/lookup_devices/";
@@ -84,11 +86,11 @@
                     deviceList.forEach(element => {
                         if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
                         {
-                            chosenDevice = element.deviceID;
+                            chosenDeviceBox = element.deviceID;
                             chosenDeviceName = element.devicename;
                         }
                     });
-                    console.log(chosenDevice);
+                    console.log(chosenDeviceBox);
                     deviceChanged = true;
                     DataUpdate();
                     });
@@ -105,8 +107,12 @@
             url: lastDataURL,
             contentType: "application/json; charset=utf-8",
             crossDomain: true,
-            dataType: "json",
+            //dataType: "json",
             success: function (data, status, jqXHR) {
+                if (data == "Null"){
+                    chart1.setTitle({text: "The device " + chosenDeviceName + " has not sent any data to the system."});
+                    return;
+                }
                 sizer = data.length;
                 data.forEach(element => {
                     chart1.addSeries(element);
@@ -122,15 +128,19 @@
     function DataUpdate(){
             if (deviceChanged == true)
             {
+                chosenDevice = chosenDeviceBox;
+                clearTimeout(dataUpdateTimeout);
+                countingMagic = 0;
                 deviceChanged = false;
-/*                 for (let index = 0; index < sizer; index++) {
-                    chart1.series[index].remove();
-                } */
+                magicNumber = 20;
+                while (sizer > 0) {
+                    chart1.series[0].remove();
+                    sizer--;
+                }
                 GetFirstData();
                 return;
             }
             var lastDataURL = masterURL + "/" + chosenDevice + "/monitorgraphupdate/" + magicNumber;
-            console.log(magicNumber);
             $.ajax({
             type: "GET",
             url: lastDataURL,
@@ -143,12 +153,12 @@
                     var dt = new Date();
                     var dtl = dt.toLocaleString();
                     chart1.setTitle({text: "Now monitoring " + chosenDeviceName + ". Last data recieved at :" + dtl});
-                    setTimeout(DataUpdate, 2000);
-                    console.log("INIT FINISHED!");
+                    dataUpdateTimeout = setTimeout(DataUpdate, 5000);
+                    console.log("data update magic number complete!");
                 }
                 else{
                     countingMagic++;
-                    var magicPercentage = countingMagic / 40 * 100;
+                    var magicPercentage = countingMagic / 20 * 100;
                     chart1.setTitle({text: "Loading data for " + chosenDeviceName + " - %" + magicPercentage});
                     magicNumber = magicNumber - 1;
                     DataUpdate();
@@ -162,7 +172,23 @@
             }
         });
     }
-    
+    var change = {
+    0: 'Very Low',
+    5: 'Low',
+    10: 'Medium',
+    15: 'High',
+    20: 'Very High'
+};
+
+    var checker = function(ba){
+        if (ba > 0){
+            return 'On';
+        }
+        else
+        {
+            return 'Off';
+        }
+    }
     var datat = [[1167609600000,0.7537], [1167696000000,0.7537]]
     var chart1 = Highcharts.chart('container', {
             chart: {
@@ -187,54 +213,50 @@
                 align: 'right',
                 verticalAlign: 'top',
                 layout: 'vertical',
+                //symbolRadius: 0,
                 x: 0,
-                y: 100
+                y: 100,
+                labelFormatter: function() {
+                    //console.log(this.userOptions.type);
+                    if (this.userOptions.type == "line"){ 
+                        var lastVal = this.yData[this.yData.length - 1];
+                        return '<span>' + this.name + ':</span> <b>' + lastVal + '</b> </n>';
+                    }
+                    else{
+                        var lastVal = this.yData[this.yData.length - 1];
+                        if (lastVal > 0){
+                            return '<span>' + this.name + ':</span> <b> On </b> <span style="color: #ADFF2F"> ▲ </span> </n>';
+                        }
+                        else{
+                            return '<span>' + this.name + ':</span> <b> Off </b> <span style="color: #FF0000"> ▼ </span> </n>';
+                        }
+                        //▼▲♦
+                    }
+                    
+                }
             },
             tooltip: {
                     xDateFormat: '%d/%m/%Y',
                     shared: true,
                     split: false,
-                    enabled: true
+                    enabled: true,
                 },
             plotOptions: {
-/*                 line: {
-                    dataLabels: {
-                        enabled: true
-                    },
-                    enableMouseTracking: false
-                    }, */
-                area: {
-                    fillColor: {
-                        linearGradient: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 1
-                        },
-                        stops: [
-                            [0, Highcharts.getOptions().colors[0]],
-                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                        ]
-                    },
-                    marker: {
-                        enabled: false,
-                        states: {
-                        hover: {
-                            enabled: true,
-                            radius: 3
+                column : {
+                        tooltip: {
+                            pointFormatter: function() {
+                                var symbol = '●';
+                                if (this.y > 0){
+                                    //return "" + this.series.name + " On";
+                                    return '<span style="color:' + this.series.color + '">' + symbol + '</span> <span>' + this.series.name + ': On </span><span style="color: #ADFF2F"> ▲ </span> <br/>'
+                                }
+                                else{
+                                    return '<span style="color:' + this.series.color + '">' + symbol + '</span> <span>' + this.series.name + ': Off </span><span style="color: #FF0000"> ▼ </span> <br/>'
+                                }
+                            }
                         }
-                    }
-                    },
-                    lineWidth: 1,
-                    states: {
-                        hover: {
-                            lineWidth: 1
-                        }
-                    },
-                    threshold: null
-                }
+                },
             },
-
             series: [{
                 type: 'area',
                 name: 'USD to EUR',
