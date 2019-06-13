@@ -13,9 +13,9 @@
                     <div class="body block-header">
                         <div class="row">
                             <div class="col-lg-6 col-md-8 col-sm-12">
-                                <h2>Data Tables Lookup</h2>
+                                <h2>Data Charts Historic Lookup</h2>
                                 <ul class="breadcrumb p-l-0 p-b-0 ">
-                                    <li class="breadcrumb-item active">Select IOT device ID and dates to show all data recieved between these times</li>
+                                    <li class="breadcrumb-item active"> </li>
                                 </ul>
                             </div>
                         </div>
@@ -68,6 +68,7 @@
     LoadDropDownBox();
     LoadDatePickers();
     var chosenDevice;
+    var chosenDeviceName;
     var deviceList = [];
 
     var GlobalData = [];
@@ -94,12 +95,20 @@
                     $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
                     $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
                     var selectedvaluefromdropdownbox = $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                    
+
+                    while(chart1.series.length > 0){
+                    chart1.series[0].remove();
+                    }
+
                     deviceList.forEach(element => {
                         if (element.devicename == selectedvaluefromdropdownbox[0].innerText)
                         {
                             chosenDevice = element.deviceID;
+                            chosenDeviceName = element.devicename;
                         }
                     });
+                    chart1.setTitle({text: "You have selected the IoT device " + chosenDeviceName + ", please select dates to search between to continue."});
                     console.log(chosenDevice);
                     });
             },
@@ -111,6 +120,7 @@
 
     //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
     function GetAPIData() {
+        
         var packetsToDisplay = 10;
         var fromVal = new Date(document.getElementById("dateFrom").value);
         var fromValSeconds = fromVal.getTime();
@@ -121,8 +131,9 @@
             from: fromVal,
             to: toVal
         };
+        chart1.setTitle({text: "Now loading chart for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
         //var lgid = document.getElementById('LegioGuardIDText').value;
-        var res3 = masterURL + "/" + chosenDevice + "/betweendates";
+        var res3 = masterURL + "/" + chosenDeviceName + "/betweendates";
         $.ajax({
             type: "POST",
             url: res3,
@@ -131,9 +142,12 @@
             crossDomain: true,
             //dataType: "text",
             success: function (data, status, jqXHR) {
+              
               data.forEach(element => {
                     chart1.addSeries(element);
                 });
+                
+              chart1.setTitle({text: "Now viewing chart for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
             },
             error: function (jqXHR, status) {
                 console.log("ERROR");
@@ -147,7 +161,7 @@
                 zoomType: 'x'
             },
             title: {
-                text: 'Select an IoT device from the menu to begin monitoring'
+                text: 'Select an IoT device from the menu to load data'
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
@@ -167,25 +181,7 @@
                 layout: 'vertical',
                 //symbolRadius: 0,
                 x: 0,
-                y: 100,
-                labelFormatter: function() {
-                    //console.log(this.userOptions.type);
-                    if (this.userOptions.type == "line"){ 
-                        var lastVal = this.yData[this.yData.length - 1];
-                        return '<span>' + this.name + ':</span> <b>' + lastVal + '</b> </n>';
-                    }
-                    else{
-                        var lastVal = this.yData[this.yData.length - 1];
-                        if (lastVal > 0){
-                            return '<span>' + this.name + ':</span> <b> On </b> <span style="color: #ADFF2F"> ▲ </span> </n>';
-                        }
-                        else{
-                            return '<span>' + this.name + ':</span> <b> Off </b> <span style="color: #FF0000"> ▼ </span> </n>';
-                        }
-                        //▼▲♦
-                    }
-                    
-                }
+                y: 100
             },
             tooltip: {
                     xDateFormat: '%d/%m/%Y',
