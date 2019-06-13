@@ -129,8 +129,8 @@ app.get("/:deviceid/last/:amount", function(req, res) {
   });
 });
 
-//retrieve data from a device between two dates
-app.post("/:deviceid/betweendates", function(req, res) {
+//retrieve data from a device between two dates LEGACY
+app.post("/:deviceid/betweendatesLEGACY", function(req, res) {
   iotdb.collection(req.params.deviceid).find({}).toArray(function(err, docs){
     arrayResult = [];
     console.log(req.body);
@@ -677,6 +677,8 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
         keyNames.push(element);
         }
     });
+    
+
     keyNames.forEach(propname => {
       if (typeof docs[limitAmount][propname] === "boolean")
       {
@@ -701,6 +703,85 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
 });
 
 
+
+app.post("/:deviceid/betweendates", function(req, res) {
+  console.log("Between dates fired!");
+  var objectArray = [];
+  iotdb.collection(req.params.deviceid).find({}).toArray(function(err, docs){
+    arrayResult = [];
+    console.log(req.body);
+    to = new Date(req.body.to);
+    console.log(to);
+    from = new Date(req.body.from);
+    console.log(from);
+    docs.forEach(element => {
+      console.log(element);
+      var check = new Date(element.time);
+      if((check.getTime() <= to.getTime() && check.getTime() >= from.getTime()))
+      {
+        arrayResult.push(element);
+      }
+    });
+    
+    keyNames = [];
+    var getLabelsSmall = Object.keys(arrayResult[0]);
+    getLabelsSmall.forEach(element => { //gets labels for buttons
+        if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
+        }
+        else
+        {
+        keyNames.push(element);
+        }
+    });
+    console.log(keyNames);
+    keyNames.forEach(propname => {
+      console.log(propname);
+      var keyArray = [];
+      var isABool = false;
+      docs.forEach(dataPiece => {
+        if (typeof dataPiece[propname] === "boolean")
+        {
+          isABool = true;
+          if (dataPiece[propname] == true)
+          {
+            dataPiece[propname] = 20;
+          }
+          else
+          {
+              dataPiece[propname] = -20;
+          }
+        }
+        var miniArray = [];
+        var timeS = new Date(dataPiece.time);
+        var timeSR = timeS.getTime();
+        miniArray.push(timeSR, dataPiece[propname]);
+        keyArray.push(miniArray);
+      });
+      if (isABool == false){
+        var returnData = {
+          type: 'line',
+          name: propname,
+          data: keyArray,
+          marker: {symbol : 'square', radius : 2 },
+          visible: false};
+          objectArray.push(returnData);
+        }
+      else{
+        var returnData = {
+          type: 'column',
+          name: propname,
+          data: keyArray,
+          marker: {symbol : 'square', radius : 2 },
+          visible: false};
+          objectArray.push(returnData);
+        }
+    console.log(keyArray);
+    });
+    res.end();
+    console.log("Finished!");
+  });
+
+});
 
 
 /* 
