@@ -72,6 +72,7 @@ app.use(function(req, res, next) {
 
 //users and devices api stuff/////////////////////////////////////////////////////
 
+
 app.post("/:username/register_device", function(req, res) {
   devicedb.collection(req.params.username).insertOne(req.body).then (function() {
     res.send(req.body);
@@ -103,7 +104,7 @@ app.get("/:username/lookup_devices", function(req, res) {
 //used for iot to send data packets to api server, checks agaisnt alarm system
 app.post("/:deviceid", function(req, res) {
   iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
-    res.send("Recieved:");
+    res.send("o");
     AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
     res.end();
   });
@@ -269,7 +270,7 @@ function AlarmProcessor(deviceID, deviceData, username){
   alarmdb = outsideDatabase.db('alarms_' + username);
   var dataValues = Object.keys(deviceData);
   alarmdb.collection(deviceID).find({}).toArray(function(err, alarmsList){
-    console.log(alarmsList);
+    if (alarmsList == null){return;} // checks if no alarms db exists for this device, then quits
     dataValues.forEach(deviceValue => {
       alarmsList.forEach(alarm => {
         if (alarm.alarmValue == deviceValue)
@@ -302,7 +303,7 @@ function AlarmProcessor(deviceID, deviceData, username){
                       alarmEmailAddress: alarm.alarmEmailAddress
                     }
                     triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
-                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
+                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {});
 
                     var bellAlarmRecord = {
                       alarmName: alarm.alarmName,
@@ -315,7 +316,7 @@ function AlarmProcessor(deviceID, deviceData, username){
                     }
 
                     bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + username);
-                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {console.log(alarmRecord);});
+                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {});
                   }
                 });
               });
@@ -348,7 +349,7 @@ function AlarmProcessor(deviceID, deviceData, username){
                       alarmEmailAddress: alarm.alarmEmailAddress
                     }
                     triggeredAlarmsDB = outsideDatabase.db('triggered_alarms_' + username);
-                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {console.log(alarmRecord);});
+                    triggeredAlarmsDB.collection(deviceID).insertOne(alarmRecord).then (function() {});
 
                     var bellAlarmRecord = {
                       alarmName: alarm.alarmName,
@@ -361,7 +362,7 @@ function AlarmProcessor(deviceID, deviceData, username){
                     }
 
                     bellTriggeredAlarmsDB = outsideDatabase.db('triggered_bell_alarms_' + username);
-                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {console.log(alarmRecord);});
+                    bellTriggeredAlarmsDB.collection('all').insertOne(bellAlarmRecord).then (function() {});
                   }
                 });
               });
@@ -707,24 +708,28 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
 app.post("/:deviceid/betweendates", function(req, res) {
   console.log("Between dates fired!");
   var objectArray = [];
-  iotdb.collection(req.params.deviceid).find({}).toArray(function(err, docs){
-    arrayResult = [];
-    console.log(req.body);
+
+  //{time:{$gt:0,$lt:15604533658671}}
+  iotdb.collection(req.params.deviceid).find(req.body).toArray(function(err, docs){
+     //= [];
+/*     console.log(req.body);
     to = new Date(req.body.to);
     console.log(to);
     from = new Date(req.body.from);
     console.log(from);
     docs.forEach(element => {
-      console.log(element);
       var check = new Date(element.time);
       if((check.getTime() <= to.getTime() && check.getTime() >= from.getTime()))
       {
         arrayResult.push(element);
       }
-    });
-    
+    }); */
+    if (docs[0] == null)
+    {
+      return;
+    }
     keyNames = [];
-    var getLabelsSmall = Object.keys(arrayResult[0]);
+    var getLabelsSmall = Object.keys(docs[0]);
     getLabelsSmall.forEach(element => { //gets labels for buttons
         if (element == "time" || element == "_id"){//makes sure not to add buttons for time or datapacket ID
         }
@@ -733,7 +738,6 @@ app.post("/:deviceid/betweendates", function(req, res) {
         keyNames.push(element);
         }
     });
-    console.log(keyNames);
     keyNames.forEach(propname => {
       console.log(propname);
       var keyArray = [];
@@ -775,8 +779,8 @@ app.post("/:deviceid/betweendates", function(req, res) {
           visible: false};
           objectArray.push(returnData);
         }
-    console.log(keyArray);
     });
+    res.send(objectArray);
     res.end();
     console.log("Finished!");
   });

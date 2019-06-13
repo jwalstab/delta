@@ -113,7 +113,10 @@
     function GetAPIData() {
         var packetsToDisplay = 10;
         var fromVal = new Date(document.getElementById("dateFrom").value);
+        var fromValSeconds = fromVal.getTime();
         var toVal = new Date(document.getElementById("dateTo").value);
+        var toValSeconds = toVal.getTime();
+        var findString = '{time:{$gt:' + fromValSeconds +',$lt:'+ toValSeconds +'}}';
         var dates = {
             from: fromVal,
             to: toVal
@@ -123,14 +126,12 @@
         $.ajax({
             type: "POST",
             url: res3,
-            data: JSON.stringify(dates),
-            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(findString),
+            //contentType: "application/json; charset=utf-8",
             crossDomain: true,
-            dataType: "json",
+            //dataType: "text",
             success: function (data, status, jqXHR) {
-              console.log(data);
               data.forEach(element => {
-                    console.log(element);
                     chart1.addSeries(element);
                 });
             },
