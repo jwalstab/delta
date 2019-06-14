@@ -120,7 +120,7 @@
 
     //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
     function GetAPIData() {
-      chart1.setTitle({text: "Now loading data for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
+      
         var packetsToDisplay = 10;
         var fromVal = new Date(document.getElementById("dateFrom").value);
         console.log(fromVal);
@@ -130,6 +130,7 @@
         var toValSeconds = toVal.getTime();
         var findString = "{time:{$gt:" + fromValSeconds +",$lt:"+ toValSeconds +"}}";
         var res3 = masterURL + "/" + chosenDevice + "/betweendates";
+        chart1.setTitle({text: "Now loading data for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
         $.ajax({
             type: "POST",
             url: res3,
