@@ -113,45 +113,56 @@
                     });
             },
             error: function (jqXHR, status) {
-                console.log("ERROR");
+                console.log("ERROR" + jqXHR + " status: " + status);
             }
         });
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////load data to table from api area
     function GetAPIData() {
-        
+      chart1.setTitle({text: "Now loading data for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
         var packetsToDisplay = 10;
         var fromVal = new Date(document.getElementById("dateFrom").value);
+        console.log(fromVal);
         var fromValSeconds = fromVal.getTime();
         var toVal = new Date(document.getElementById("dateTo").value);
+        console.log(toVal);
         var toValSeconds = toVal.getTime();
-        var findString = '{time:{$gt:' + fromValSeconds +',$lt:'+ toValSeconds +'}}';
-        var dates = {
-            from: fromVal,
-            to: toVal
-        };
-        chart1.setTitle({text: "Now loading chart for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
-        //var lgid = document.getElementById('LegioGuardIDText').value;
-        var res3 = masterURL + "/" + chosenDeviceName + "/betweendates";
+        var findString = "{time:{$gt:" + fromValSeconds +",$lt:"+ toValSeconds +"}}";
+        var res3 = masterURL + "/" + chosenDevice + "/betweendates";
         $.ajax({
             type: "POST",
             url: res3,
             data: JSON.stringify(findString),
-            //contentType: "application/json; charset=utf-8",
+            //processData: false,
+            contentType: "application/javascript",
             crossDomain: true,
-            //dataType: "text",
+            //dataType: "json",
             success: function (data, status, jqXHR) {
-              
-              data.forEach(element => {
+              if (data == "No Data"){
+                chart1.setTitle({text: "No data found for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
+              }
+              else{
+                data.forEach(element => {
                     chart1.addSeries(element);
                 });
                 
               chart1.setTitle({text: "Now viewing chart for " + chosenDeviceName + " between the times of " + fromVal.toLocaleString() + " and " + toVal.toLocaleString()});
+              }
+              
             },
             error: function (jqXHR, status) {
-                console.log("ERROR");
+              console.log("ERROR" + jqXHR + " status: " + status);
             }
+        });
+
+        fetch(res3, {
+          method: 'post',
+          body: dates
+        }).then(function(response) {
+          
+        }).catch(function(err) {
+          // Error :(
         });
     }
 

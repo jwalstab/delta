@@ -707,9 +707,15 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
 
 app.post("/:deviceid/betweendates", function(req, res) {
   console.log("Between dates fired!");
+  console.log(req.body);
   var objectArray = [];
-
+/*   var q1 = '{time:{$gt:' + req.body.from +',$lt:'+ req.body.to +'}}';
+  console.log(q1);
   //{time:{$gt:0,$lt:15604533658671}}
+  var value = (req.body.alarmName);
+  var query = {};
+  query[name] = value; */
+  console.log(req.body.timea);
   iotdb.collection(req.params.deviceid).find(req.body).toArray(function(err, docs){
      //= [];
 /*     console.log(req.body);
@@ -726,6 +732,9 @@ app.post("/:deviceid/betweendates", function(req, res) {
     }); */
     if (docs[0] == null)
     {
+      console.log("no data");
+      res.send("No Data");
+      res.end();
       return;
     }
     keyNames = [];
