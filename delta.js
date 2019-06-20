@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -73,6 +73,7 @@ app.use(function(req, res, next) {
 //users and devices api stuff/////////////////////////////////////////////////////
 
 
+//registers a new device
 app.post("/:username/register_device", function(req, res) {
   devicedb.collection(req.params.username).insertOne(req.body).then (function() {
     res.send(req.body);
@@ -427,10 +428,12 @@ function AlarmProcessor(deviceID, deviceData, username){
 ////////WEB SERVER
 
 app.use(express.static(path.join(__dirname,'public')));
+
 app.use(expressLayouts);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
 
 app.get('/public/assets/images/favico.ico' , function(req , res){/*code*/});
 
@@ -442,6 +445,11 @@ app.get("/index", function(req, res) {
 app.get("/monitor", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
   res.render('monitor');
+});
+
+app.get("/phaser", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
+  res.render('phaser', { layout: 'emptylayout' });
 });
 
 app.get("/", function(req, res) {
@@ -470,6 +478,10 @@ app.get("/register_iot", function(req, res) {
 
 app.get("/alarms", function(req, res) {
   res.render('alarms');
+});
+
+app.get("/phaser/:fileToGet", function(req, res) {
+  res.sendFile(__dirname + '/public/assets/phaser/' + req.params.fileToGet);
 });
 
 app.post("/register_iot", function(req, res) {
