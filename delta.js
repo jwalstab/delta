@@ -836,10 +836,20 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
 
 
 app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
+
+  LegioGuardDataObject = {
+    EleHeater_Mng_Hot_Ele_Man_Msk: req.body.coils[7],
+    AlarmMng_AlrmResByBms: req.body.coils[8],
+    OnOffUnitMng_KeybOnOff: req.body.coils[9],
+    Flush_Valve_Op_ColdVlv_Al: req.body.coils[29],
+    Flush_Valve_Manual_On_Flush: req.body.coils[51],
+    Master_Ctrl_Mng_Rot_CP: req.body.coils[59],
+    Master_Ctrl_Mng_Rot_HP: req.body.coils[60]
+  }
   console.log(req.body);
-  iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
-    res.send("o");
-    //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
-    res.end();
+  iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
   });
+  res.send("o");
+  //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
+  res.end();
 });
