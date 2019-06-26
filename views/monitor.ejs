@@ -366,7 +366,7 @@ function ManageFan(){
                 parent: 'phaserdiv',
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
-                width: 1000,
+                width: 1200,
                 height: 600
             },
 /*             width: 800,
@@ -414,7 +414,7 @@ function ManageFan(){
 
         function create ()
         {
-                this.add.image(500, 300, 'background');
+                this.add.image(600, 300, 'background');
                 fanImageOn = this.add.image(810, 300, 'fansmallon');
                 fanImageOff = this.add.image(810, 300, 'fansmalloff');
 
@@ -442,14 +442,14 @@ function ManageFan(){
                 
                 fanImageOn.setVisible(false);
                 fanImageOff.setVisible(true);
-                this.add.text(190, 200, "Cold Return Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
-                coldReturnTempText = this.add.text(190, 215, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
+                this.add.text(175, 160, "Cold Return Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
+                coldReturnTempText = this.add.text(175, 175, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
 
                 this.add.text(110, 400, "Cold Supply Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
                 coldSupplyTempText = this.add.text(110, 415, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
                 
-                this.add.text(360, 200, "Suction Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
-                Suct_Temp_Text = this.add.text(360 , 215, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
+                this.add.text(405, 160, "Suction Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
+                Suct_Temp_Text = this.add.text(405 , 175, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
 
                 this.add.text(365, 410, "Evap Inlet Temp", { fontFamily: 'Arial', fontSize: 10, color: '#00ff00' });
                 Evap_Inlet_Temp_Text = this.add.text(365 , 425, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });

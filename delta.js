@@ -833,3 +833,13 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
     res.end();
   });
 }); */
+
+
+app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
+  console.log(req.body);
+  iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
+    res.send("o");
+    //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
+    res.end();
+  });
+});
