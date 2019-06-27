@@ -974,13 +974,18 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     Low_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
   }
+
+  setTimeout(function(LegioGuardDataObject) {
+    iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
+      res.send("o");
+      res.end();
+    });
+  }, 3000);
+  
   iotdb.collection(req.params.deviceid + "raw").insertOne(req.body).then (function() {
   });
 
-  iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
-    res.send("o");
-    res.end();
-  });
+
   //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
 });
 
