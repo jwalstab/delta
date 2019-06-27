@@ -973,9 +973,10 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     Flow_Switch_ColdFS2_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Low_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
-  }
-  iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
-  });
+  }.then (function(){
+    iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
+    });
+  })
   iotdb.collection(req.params.deviceid + "raw").insertOne(req.body).then (function() {
   });
   res.send("o");
