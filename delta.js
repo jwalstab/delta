@@ -953,7 +953,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     Flow_Switch_HotFS2_Char: uInt16ToFloat32([req.body.inputRegisters[49],req.body.inputRegisters[50]]),
     Hot_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[51],req.body.inputRegisters[52]]),
     Cold_Tank_Temp1: uInt16ToFloat32([req.body.inputRegisters[53],req.body.inputRegisters[54]]),
-    Cold_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[55],req.body.inputRegisters[57]]),
+    Cold_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[55],req.body.inputRegisters[56]]),
     Cold_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[57],req.body.inputRegisters[58]]),
     Cold_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[59],req.body.inputRegisters[60]]),
     Warm_ToBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[61],req.body.inputRegisters[62]]),
@@ -995,8 +995,28 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
   return floatView[0];
 } */
 
-function uInt16ToFloat32(data) {
+/* function uInt16ToFloat32(data) {
   var realNumber = data[0] + data[1];
   var devideNumber = realNumber / 1000;
   return devideNumber;
+} */
+
+function back2Real(data){
+  var low = data[0];
+  var high = data[1];
+  var fpnum=low|(high<<16)
+  var negative=(fpnum>>31)&1;
+  var exponent=(fpnum>>23)&0xFF
+  var mantissa=(fpnum&0x7FFFFF)
+  if(exponent==255){
+   if(mantissa!=0)return Number.NaN;
+   return (negative) ? Number.NEGATIVE_INFINITY :
+         Number.POSITIVE_INFINITY;
+  }
+  if(exponent==0)exponent++;
+  else mantissa|=0x800000;
+  exponent-=127
+  var ret=(mantissa*1.0/0x800000)*Math.pow(2,exponent)
+  if(negative)ret=-ret;
+  return ret;
 }
