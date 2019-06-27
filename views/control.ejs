@@ -281,7 +281,8 @@ function ManageFan(){
                 Hot_Supply_Temp_Text = this.add.text(840 , 130, " ", { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
         },
 
-        update: function (){
+        update: function (time, delta)
+        {
             if (Hot_Fan == true){
                 fanImageOn.angle+=15;
             }
