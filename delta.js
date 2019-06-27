@@ -773,7 +773,6 @@ app.post("/:deviceid/betweendates", function(req, res) {
         }
     });
     keyNames.forEach(propname => {
-      console.log(propname);
       var keyArray = [];
       var isABool = false;
       docs.forEach(dataPiece => {
@@ -1173,7 +1172,8 @@ function uInt16ToFloat32(uint16array) {
   intView[0] = uint16array[0];
   intView[1] = uint16array[1];
 
-  var realNumber = floatView[0].toFixed(2);
+  //var realNumber = floatView[0].toFixed(2);
+  var realNumber = Math.round(realNumber * 1e2 ) / 1e2;
   console.log(realNumber);
   return realNumber;
 }
