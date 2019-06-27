@@ -972,6 +972,8 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
   }
   iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
   });
+  iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
+  });
   res.send("o");
   //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
   res.end();
