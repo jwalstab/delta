@@ -1,0 +1,145 @@
+
+<!doctype html>
+<html class="no-js " lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<meta name="description" content="Responsive Bootstrap 4 and web Application ui kit.">
+
+<title>Quantum Data Technologies IoT Portal</title>
+<!-- Favicon-->
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/plugins/bootstrap/css/bootstrap.min.css">
+
+<!-- Custom Css -->
+<link rel="stylesheet" href="assets/css/main.css">    
+<link rel="stylesheet" href="assets/css/color_skins.css">
+</head>
+<body class="theme-purple">
+<div class="authentication">
+    <div class="container">
+        <div class="col-md-12 content-center">
+            <div class="row clearfix">
+                <div class="col-lg-6 col-md-12">
+                    <div class="company_detail">
+                        <h4 class="image"><img src="/assets/images/blank.png" width="163" alt="Logo"></h4>
+<!--                         <h3>Quantum Data Technologies <strong>IoT</strong> Portal</h3> -->
+                        <img src="/assets/images/QR-Logo-DATA-Tech-txt-.png">
+                        <div class="footer">
+                                
+<!--                             <ul  class="social_link list-unstyled">
+                                <li><a href="https://thememakker.com" title="ThemeMakker"><i class="zmdi zmdi-globe"></i></a></li>
+                                <li><a href="https://themeforest.net/user/thememakker" title="Themeforest"><i class="zmdi zmdi-shield-check"></i></a></li>
+                                <li><a href="https://www.linkedin.com/company/thememakker/" title="LinkedIn"><i class="zmdi zmdi-linkedin"></i></a></li>
+                                <li><a href="https://www.facebook.com/thememakkerteam" title="Facebook"><i class="zmdi zmdi-facebook"></i></a></li>
+                                <li><a href="http://twitter.com/thememakker" title="Twitter"><i class="zmdi zmdi-twitter"></i></a></li>
+                                <li><a href="http://plus.google.com/+thememakker" title="Google plus"><i class="zmdi zmdi-google-plus"></i></a></li>
+                                <li><a href="https://www.behance.net/thememakker" title="Behance"><i class="zmdi zmdi-behance"></i></a></li>
+                            </ul> -->
+                            <hr>
+                            <p id="responsebody">Secure IoT Portal</p>
+<!--                             <ul class="list-unstyled">
+                                <li><a href="www.quantumdata.com.au" target="_blank">Contact Us</a></li>
+                                <li><a href="www.quantumdata.com.au" target="_blank">About Us</a></li>
+                                <li><a href="www.quantumdata.com.au" target="_blank">Services</a></li>
+                                <li><a href="javascript:void(0);">FAQ</a></li>
+                            </ul> -->
+                        </div>
+                    </div>
+                </div>                        
+                <div class="col-lg-5 col-md-12 offset-lg-1">
+                    <div class="card-plain">
+                        <div class="header">
+                            <h5>calculate</h5>
+                        </div>
+                        <form class="form">
+                            <div class="input-group">
+                                <input type="text" id="usernamebox" class="form-control" placeholder="1">
+                                <span class="input-group-addon"></span>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="passwordbox" placeholder="2" class="form-control" />
+                                <span class="input-group-addon"></span>
+                            </div>                            
+                        </form>
+                        <div class="footer">
+                            <a href="#" class="btn btn-primary btn-round btn-block" onclick="Redirect()" >calculate</a>
+                            <a href="www.quantumdata.com.au" class="btn btn-primary btn-simple btn-round btn-block">Return To Website</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Jquery Core Js -->
+<script src="assets/bundles/libscripts.bundle.js"></script>
+<script src="assets/bundles/vendorscripts.bundle.js"></script> <!-- Lib Scripts Plugin Js -->
+
+<script src="../assets/plugins/particles-js/particles.min.js"></script>
+<script src="../assets/plugins/particles-js/particles.js"></script>
+</body>
+
+
+<script>
+function Redirect() {
+    var result;
+    var username = document.getElementById('usernamebox').value;
+    var password = document.getElementById('passwordbox').value;
+    var result = RunNumbers([username, password]);
+        var myNode2 = document.getElementById("responsebody");
+        while (myNode2.firstChild) {
+            myNode2.removeChild(myNode2.firstChild);
+        }
+        var rbody = $('<p>answer is ' + result +'</p>');
+        $('#responsebody').append(rbody);
+}
+
+
+/* function RunNumbers(data){
+    var low = data[0];
+  var high = data[1];
+  var fpnum=low|(high<<16)
+  var negative=(fpnum>>31)&1;
+  var exponent=(fpnum>>23)&0xFF
+  var mantissa=(fpnum&0x7FFFFF)
+  if(exponent==255){
+   if(mantissa!=0)return Number.NaN;
+   return (negative) ? Number.NEGATIVE_INFINITY :
+         Number.POSITIVE_INFINITY;
+  }
+  if(exponent==0)exponent++;
+  else mantissa|=0x800000;
+  exponent-=127
+  var ret=(mantissa*1.0/0x800000)*Math.pow(2,exponent)
+  if(negative)ret=-ret;
+  return ret;
+}
+ */
+
+
+/* function RunNumbers(data){
+  var ui16 = new Uint16Array(data);
+  var fl32 = new Float32Array(ui16.buffer, ui16.byteOffset, ui16.byteLength / Float32Array.BYTES_PER_ELEMENT);
+  return fl32[0];
+} */
+function RunNumbers(uint16array) {
+  var buffer = new ArrayBuffer(4);
+  var intView = new Uint16Array(buffer);
+  var floatView = new Float32Array(buffer);
+
+  intView[0] = uint16array[0];
+  intView[1] = uint16array[1];
+
+  var realNumber = floatView[0].toFixed(2);
+  return realNumber;
+}
+
+/* function RunNumbers(data) {
+  var realNumber = data[0] + data[1];
+  var devideNumber = realNumber / 1000;
+  return devideNumber;
+} */
+</script>
+</html>

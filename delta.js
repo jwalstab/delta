@@ -477,6 +477,10 @@ app.get("/data_charts", function(req, res) {
   res.render('data_charts');
 });
 
+app.get("/calc", function(req, res) {
+  res.render('calc', { layout: 'emptylayout' });
+});
+
 app.get("/control", function(req, res) {
   res.render('control');
 });
@@ -972,7 +976,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
   }
   iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
   });
-  iotdb.collection(req.params.deviceid).insertOne(req.body).then (function() {
+  iotdb.collection(req.params.deviceid + "raw").insertOne(req.body).then (function() {
   });
   res.send("o");
   //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
@@ -1001,7 +1005,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
   return devideNumber;
 } */
 
-function uInt16ToFloat32(data){
+/* function uInt16ToFloat32(data){
   var low = data[0];
   var high = data[1];
   var fpnum=low|(high<<16)
@@ -1019,4 +1023,16 @@ function uInt16ToFloat32(data){
   var ret=(mantissa*1.0/0x800000)*Math.pow(2,exponent)
   if(negative)ret=-ret;
   return ret;
+} */
+
+function uInt16ToFloat32(uint16array) {
+  var buffer = new ArrayBuffer(4);
+  var intView = new Uint16Array(buffer);
+  var floatView = new Float32Array(buffer);
+
+  intView[0] = uint16array[0];
+  intView[1] = uint16array[1];
+
+  var realNumber = floatView[0].toFixed(2);
+  return realNumber;
 }
