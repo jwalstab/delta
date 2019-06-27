@@ -973,17 +973,16 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     Flow_Switch_ColdFS2_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Low_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
-  }.then (function(){
-    iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
-    });
-  })
+  }
   iotdb.collection(req.params.deviceid + "raw").insertOne(req.body).then (function() {
   });
-  res.send("o");
-  //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
-  res.end();
-});
 
+  iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
+    res.send("o");
+    res.end();
+  });
+  //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
+});
 
 /* function uInt16ToFloat32(data){
   var ui16 = new Uint16Array(data);
