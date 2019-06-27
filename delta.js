@@ -852,6 +852,8 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
 
   LegioGuardDataObject = {
 
+    time: req.body.time,
+
     //COILS
     EleHeater_Mng_Hot_Ele_Man_Msk: req.body.coils[7],
     AlarmMng_AlrmResByBms: req.body.coils[8],
@@ -946,24 +948,24 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     Flow_Switch_Read_Cold_FlowS1: uInt16ToFloat32([req.body.inputRegisters[29],req.body.inputRegisters[30]]),
     Flow_Switch_Read_Hot_FlowS1: uInt16ToFloat32([req.body.inputRegisters[31],req.body.inputRegisters[32]]),
     Flow_Switch_Read_Hot_FlowS2: uInt16ToFloat32([req.body.inputRegisters[33],req.body.inputRegisters[34]]),
-    ColdFlow_Senser_Al_Active: req.body.inputRegisters[36],
-    HotFlow1_Senser_Al_Active: req.body.inputRegisters[37],
-    HotFlow2_Senser_Al_Active: req.body.inputRegisters[38],
-    Flow_Switch_ColdFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[39],req.body.inputRegisters[40]]),
-    Flow_Switch_ColdFS_Char: uInt16ToFloat32([req.body.inputRegisters[41],req.body.inputRegisters[42]]),
-    Flow_Switch_HotFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[43],req.body.inputRegisters[44]]),
-    Flow_Switch_HotFS1_Char: uInt16ToFloat32([req.body.inputRegisters[45],req.body.inputRegisters[46]]),
-    Flow_Switch_HotFS2_Feq: uInt16ToFloat32([req.body.inputRegisters[47],req.body.inputRegisters[48]]),
-    Flow_Switch_HotFS2_Char: uInt16ToFloat32([req.body.inputRegisters[49],req.body.inputRegisters[50]]),
-    Hot_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[51],req.body.inputRegisters[52]]),
-    Cold_Tank_Temp1: uInt16ToFloat32([req.body.inputRegisters[53],req.body.inputRegisters[54]]),
-    Cold_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[55],req.body.inputRegisters[56]]),
-    Cold_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[57],req.body.inputRegisters[58]]),
-    Cold_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[59],req.body.inputRegisters[60]]),
-    Warm_ToBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[61],req.body.inputRegisters[62]]),
-    Warm_ReturnBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[63],req.body.inputRegisters[64]]),
-    Hot_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[65],req.body.inputRegisters[66]]),
-    Ele_Boost_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    ColdFlow_Senser_Al_Active: req.body.inputRegisters[35],
+    HotFlow1_Senser_Al_Active: req.body.inputRegisters[36],
+    HotFlow2_Senser_Al_Active: req.body.inputRegisters[37],
+    Flow_Switch_ColdFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[38],req.body.inputRegisters[40]]),
+    Flow_Switch_ColdFS_Char: uInt16ToFloat32([req.body.inputRegisters[40],req.body.inputRegisters[42]]),
+    Flow_Switch_HotFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[42],req.body.inputRegisters[44]]),
+    Flow_Switch_HotFS1_Char: uInt16ToFloat32([req.body.inputRegisters[43],req.body.inputRegisters[46]]),
+    Flow_Switch_HotFS2_Feq: uInt16ToFloat32([req.body.inputRegisters[46],req.body.inputRegisters[48]]),
+    Flow_Switch_HotFS2_Char: uInt16ToFloat32([req.body.inputRegisters[48],req.body.inputRegisters[50]]),
+    Hot_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[50],req.body.inputRegisters[52]]),
+    Cold_Tank_Temp1: uInt16ToFloat32([req.body.inputRegisters[52],req.body.inputRegisters[54]]),
+    Cold_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[54],req.body.inputRegisters[56]]),
+    Cold_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[56],req.body.inputRegisters[58]]),
+    Cold_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[58],req.body.inputRegisters[60]]),
+    Warm_ToBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[60],req.body.inputRegisters[62]]),
+    Warm_ReturnBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[62],req.body.inputRegisters[64]]),
+    Hot_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[64],req.body.inputRegisters[66]])
+/*     Ele_Boost_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Heat_Exchange_Cold: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Heat_Exchange_Hot: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     EVD_Emb_1_Params_EVDEMB_1_EVD_Variables_EEV_PosSteps_Val: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
@@ -972,7 +974,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     CP_Yout2_Act: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Flow_Switch_ColdFS2_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
     Low_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
-    High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
+    High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]) */
   }
 
   //ProcessData(req.body, req.params.deviceid);
