@@ -975,7 +975,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
   }
 
-  ProcessData(req.body, req.params.deviceid);
+  //ProcessData(req.body, req.params.deviceid);
 
   iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
   });
