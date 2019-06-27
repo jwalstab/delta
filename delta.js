@@ -975,19 +975,152 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
     High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
   }
 
-  setTimeout(function(LegioGuardDataObject) {
-    iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
-      res.send("o");
-      res.end();
-    });
-  }, 3000);
+  ProcessData(req.body, req.params.deviceid);
+
+  iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
+  });
   
   iotdb.collection(req.params.deviceid + "raw").insertOne(req.body).then (function() {
   });
 
+  res.send("o");
+  res.end();
 
   //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
 });
+
+
+function ProcessData(data, deviceID){
+
+    //COILS
+    var LegioGuardFinalDataObject = {
+      EleHeater_Mng_Hot_Ele_Man_Msk: data.coils[7],
+      AlarmMng_AlrmResByBms: data.coils[8],
+      OnOffUnitMng_KeybOnOff: data.coils[9],
+      Flush_Valve_Op_ColdVlv_Al: data.coils[29],
+      Flush_Valve_Manual_On_Flush: data.coils[51],
+      Master_Ctrl_Mng_Rot_CP: data.coils[59],
+      Master_Ctrl_Mng_Rot_HP: data.coils[60],
+  
+      //DISCRETE INPUT
+      Cold_EleHeater: data.discreteInputs[0],
+      Hot_P1: data.discreteInputs[1],
+      Hot_Solend1: data.discreteInputs[2],
+      Hot_EleHeater: data.discreteInputs[3],
+      Glob_Al: data.discreteInputs[4],
+      Hot_P2: data.discreteInputs[5],
+      Hot_Fan: data.discreteInputs[6],
+      Blance_Vlv: data.discreteInputs[7],
+      Injection_Vlv: data.discreteInputs[8],
+      Hot_Solend2: data.discreteInputs[9],
+      Cold_P1: data.discreteInputs[10],
+      HotW_FlowS1: data.discreteInputs[11],
+      ColdW_FlowS: data.discreteInputs[12],
+      High_P: data.discreteInputs[13],
+      Low_P: data.discreteInputs[14],
+      Comp_Overload: data.discreteInputs[15],
+      Master_Slave: data.discreteInputs[16],
+      Cold_P_Switch: data.discreteInputs[17],
+      Al_retain_Active: data.discreteInputs[18],
+      Al_Err_retain_write_Active: data.discreteInputs[19],
+      Alrm_Prob1_Active: data.discreteInputs[20],
+      Alrm_Prob2_Active: data.discreteInputs[21],
+      Alrm_Prob3_Active: data.discreteInputs[22],
+      Alrm_Prob4_Active: data.discreteInputs[23],
+      Alrm_Prob5_Active: data.discreteInputs[24],
+      Alrm_Prob6_Active: data.discreteInputs[25],
+      Alrm_Prob7_Active: data.discreteInputs[26],
+      Alrm_Prob8_Active: data.discreteInputs[27],
+      Alrm_Prob9_Active: data.discreteInputs[28],
+      Alrm_Prob10_Active: data.discreteInputs[29],
+      Hot1_Flow_Al_Active: data.discreteInputs[30],
+      Hot2_Flow_Al_Active: data.discreteInputs[31],
+      ColdFlow_Al_Active: data.discreteInputs[32],
+      HP_Al_Active: data.discreteInputs[33],
+      LP_Al_Active: data.discreteInputs[34],
+      Comp_Oload_Al_Active: data.discreteInputs[35],
+      High_DiscT_Al_Active: data.discreteInputs[36],
+      Fan_Over_Al_Active: data.discreteInputs[37],
+      Low_SuctT_Al_Active: data.discreteInputs[38],
+      Board2_Offline: data.discreteInputs[39],
+      Comp_On: data.discreteInputs[40],
+      Flush_Valve_Flush_Valve_On: data.discreteInputs[41],
+      Flush_Valve_Cold_SuplyW_Vlv: data.discreteInputs[42],
+      Alrm_Prob11_Active: data.discreteInputs[43],
+      Alrm_Prob12_Active: data.discreteInputs[44],
+      Alrm_Master_Unit_Active: data.discreteInputs[45],
+      Alrm_Slave_Unit_Active: data.discreteInputs[46],
+      Alrm_Low_EvapInT_Active: data.discreteInputs[47],
+      Alrm_Low_HT1_Active: data.discreteInputs[48],
+      Alrm_High_CT1_Active: data.discreteInputs[49],
+      Al_Warm_Supply_Low_Active: data.discreteInputs[50],
+      Al_Warm_Supply_High_Active: data.discreteInputs[51],
+      AlarmMng_Read_Ain1_Al: data.discreteInputs[52],
+      AlarmMng_Read_Ain2_Al: data.discreteInputs[53],
+      AlarmMng_Read_Ain3_Al: data.discreteInputs[54],
+      Read_Ain4_Al: data.discreteInputs[55],
+      Read_Ain5_Al: data.discreteInputs[56],
+      Read_Ain6_Al: data.discreteInputs[57],
+      AlarmMng_Read_Ain11_Al: data.discreteInputs[58],
+      AlarmMng_Read_Ain8_Al: data.discreteInputs[59],
+      AlarmMng_Read_Ain9_Al: data.discreteInputs[60],
+      Cold_P2: data.discreteInputs[61],
+      LowP_SenserRead_Active: data.discreteInputs[62],
+      HighP_SenserRead_Active: data.discreteInputs[63],
+  
+      //HOLDING REGISTERS
+  
+  
+      //INPUT REGISTERS
+      Suct_Temp: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      Evap_Inlet_Temp: uInt16ToFloat32([data.inputRegisters[3],data.inputRegisters[4]]),
+      Cond_Outlet_Temp: uInt16ToFloat32([data.inputRegisters[5],data.inputRegisters[6]]),
+      Hot_Supply_Temp: uInt16ToFloat32([data.inputRegisters[7],data.inputRegisters[8]]),
+      Hot_Return_Temp: uInt16ToFloat32([data.inputRegisters[9],data.inputRegisters[10]]),
+      Cold_Supply_Temp: uInt16ToFloat32([data.inputRegisters[11],data.inputRegisters[12]]),
+      Cold_Return_Temp: uInt16ToFloat32([data.inputRegisters[13],data.inputRegisters[14]]),
+      Hot_Tank_Temp1: uInt16ToFloat32([data.inputRegisters[15],data.inputRegisters[16]]),
+      Hot_Tank_Temp2: uInt16ToFloat32([data.inputRegisters[17],data.inputRegisters[18]]),
+      HP_Yout1_Act: uInt16ToFloat32([data.inputRegisters[19],data.inputRegisters[20]]),
+      HP_Yout2_Act: uInt16ToFloat32([data.inputRegisters[21],data.inputRegisters[22]]),
+      Disc_Temp: uInt16ToFloat32([data.inputRegisters[23],data.inputRegisters[24]]),
+      Flow_Switch_Read_Cold_FlowS1: uInt16ToFloat32([data.inputRegisters[30],data.inputRegisters[31]]),
+      Flow_Switch_Read_Hot_FlowS1: uInt16ToFloat32([data.inputRegisters[32],data.inputRegisters[33]]),
+      Flow_Switch_Read_Hot_FlowS2: uInt16ToFloat32([data.inputRegisters[34],data.inputRegisters[36]]),
+      ColdFlow_Senser_Al_Active: data.inputRegisters[36],
+      HotFlow1_Senser_Al_Active: data.inputRegisters[37],
+      HotFlow2_Senser_Al_Active: data.inputRegisters[38],
+      Flow_Switch_ColdFS1_Feq: uInt16ToFloat32([data.inputRegisters[39],data.inputRegisters[40]]),
+      Flow_Switch_ColdFS_Char: uInt16ToFloat32([data.inputRegisters[41],data.inputRegisters[42]]),
+      Flow_Switch_HotFS1_Feq: uInt16ToFloat32([data.inputRegisters[43],data.inputRegisters[44]]),
+      Flow_Switch_HotFS1_Char: uInt16ToFloat32([data.inputRegisters[45],data.inputRegisters[46]]),
+      Flow_Switch_HotFS2_Feq: uInt16ToFloat32([data.inputRegisters[47],data.inputRegisters[48]]),
+      Flow_Switch_HotFS2_Char: uInt16ToFloat32([data.inputRegisters[49],data.inputRegisters[50]]),
+      Hot_Tank_Temp3: uInt16ToFloat32([data.inputRegisters[51],data.inputRegisters[52]]),
+      Cold_Tank_Temp1: uInt16ToFloat32([data.inputRegisters[53],data.inputRegisters[54]]),
+      Cold_Tank_Temp2: uInt16ToFloat32([data.inputRegisters[55],data.inputRegisters[56]]),
+      Cold_Tank_Temp3: uInt16ToFloat32([data.inputRegisters[57],data.inputRegisters[58]]),
+      Cold_SupToVlv_Temp: uInt16ToFloat32([data.inputRegisters[59],data.inputRegisters[60]]),
+      Warm_ToBuild_Temp: uInt16ToFloat32([data.inputRegisters[61],data.inputRegisters[62]]),
+      Warm_ReturnBuild_Temp: uInt16ToFloat32([data.inputRegisters[63],data.inputRegisters[64]]),
+      Hot_SupToVlv_Temp: uInt16ToFloat32([data.inputRegisters[65],data.inputRegisters[66]]),
+      Ele_Boost_Temp: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      Heat_Exchange_Cold: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      Heat_Exchange_Hot: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      EVD_Emb_1_Params_EVDEMB_1_EVD_Variables_EEV_PosSteps_Val: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      EVD_Emb_1_Params_EVDEMB_1_EVD_Variables_EEV_PosPercent_Val: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      CP_Yout1_Act: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      CP_Yout2_Act: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      Flow_Switch_ColdFS2_Char: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      Low_Pressure: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]]),
+      High_Pressure: uInt16ToFloat32([data.inputRegisters[1],data.inputRegisters[2]])
+    }
+
+    iotdb.collection(deviceID + "ftest").insertOne(LegioGuardFinalDataObject).then (function() {
+      res.send("o");
+      res.end();
+    });
+}
 
 /* function uInt16ToFloat32(data){
   var ui16 = new Uint16Array(data);
@@ -1039,5 +1172,6 @@ function uInt16ToFloat32(uint16array) {
   intView[1] = uint16array[1];
 
   var realNumber = floatView[0].toFixed(2);
+  console.log(realNumber);
   return realNumber;
 }
