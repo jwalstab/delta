@@ -1001,7 +1001,7 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
   return devideNumber;
 } */
 
-function back2Real(data){
+function uInt16ToFloat32(data){
   var low = data[0];
   var high = data[1];
   var fpnum=low|(high<<16)
