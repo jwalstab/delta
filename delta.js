@@ -12,8 +12,8 @@ const nodemailer = require("nodemailer");
 var MongoClient = require('mongodb').MongoClient;
 //var db;
 var outsideDatabase;
-  //MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
-  MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
+  MongoClient.connect("mongodb://165.22.241.11:27017", {useNewUrlParser: true}, function(err, database) {
+  //MongoClient.connect("mongodb://127.0.0.1:27017", {useNewUrlParser: true}, function(err, database) {
   if(err)
   throw err;
   iotdb = database.db('iot');
@@ -454,6 +454,11 @@ app.get("/phaser", function(req, res) {
 
 app.get("/", function(req, res) {
   //res.sendFile(__dirname + '/Index.html');
+  res.render('sign_in', { layout: 'emptylayout' });
+});
+
+app.get("/login", function(req, res) {
+  //res.sendFile(__dirname + '/Index.html');
   res.render('login', { layout: 'loginlayout' });
 });
 
@@ -470,6 +475,10 @@ app.get("/devices", function(req, res) {
 
 app.get("/data_charts", function(req, res) {
   res.render('data_charts');
+});
+
+app.get("/control", function(req, res) {
+  res.render('control');
 });
 
 app.get("/register_iot", function(req, res) {
@@ -838,18 +847,139 @@ app.get("/:deviceid/monitorgraphupdate/:number", function(req, res) {
 app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
 
   LegioGuardDataObject = {
+
+    //COILS
     EleHeater_Mng_Hot_Ele_Man_Msk: req.body.coils[7],
     AlarmMng_AlrmResByBms: req.body.coils[8],
     OnOffUnitMng_KeybOnOff: req.body.coils[9],
     Flush_Valve_Op_ColdVlv_Al: req.body.coils[29],
     Flush_Valve_Manual_On_Flush: req.body.coils[51],
     Master_Ctrl_Mng_Rot_CP: req.body.coils[59],
-    Master_Ctrl_Mng_Rot_HP: req.body.coils[60]
+    Master_Ctrl_Mng_Rot_HP: req.body.coils[60],
+
+    //DISCRETE INPUT
+    Cold_EleHeater: req.body.discreteInputs[0],
+    Hot_P1: req.body.discreteInputs[1],
+    Hot_Solend1: req.body.discreteInputs[2],
+    Hot_EleHeater: req.body.discreteInputs[3],
+    Glob_Al: req.body.discreteInputs[4],
+    Hot_P2: req.body.discreteInputs[5],
+    Hot_Fan: req.body.discreteInputs[6],
+    Blance_Vlv: req.body.discreteInputs[7],
+    Injection_Vlv: req.body.discreteInputs[8],
+    Hot_Solend2: req.body.discreteInputs[9],
+    Cold_P1: req.body.discreteInputs[10],
+    HotW_FlowS1: req.body.discreteInputs[11],
+    ColdW_FlowS: req.body.discreteInputs[12],
+    High_P: req.body.discreteInputs[13],
+    Low_P: req.body.discreteInputs[14],
+    Comp_Overload: req.body.discreteInputs[15],
+    Master_Slave: req.body.discreteInputs[16],
+    Cold_P_Switch: req.body.discreteInputs[17],
+    Al_retain_Active: req.body.discreteInputs[18],
+    Al_Err_retain_write_Active: req.body.discreteInputs[19],
+    Alrm_Prob1_Active: req.body.discreteInputs[20],
+    Alrm_Prob2_Active: req.body.discreteInputs[21],
+    Alrm_Prob3_Active: req.body.discreteInputs[22],
+    Alrm_Prob4_Active: req.body.discreteInputs[23],
+    Alrm_Prob5_Active: req.body.discreteInputs[24],
+    Alrm_Prob6_Active: req.body.discreteInputs[25],
+    Alrm_Prob7_Active: req.body.discreteInputs[26],
+    Alrm_Prob8_Active: req.body.discreteInputs[27],
+    Alrm_Prob9_Active: req.body.discreteInputs[28],
+    Alrm_Prob10_Active: req.body.discreteInputs[29],
+    Hot1_Flow_Al_Active: req.body.discreteInputs[30],
+    Hot2_Flow_Al_Active: req.body.discreteInputs[31],
+    ColdFlow_Al_Active: req.body.discreteInputs[32],
+    HP_Al_Active: req.body.discreteInputs[33],
+    LP_Al_Active: req.body.discreteInputs[34],
+    Comp_Oload_Al_Active: req.body.discreteInputs[35],
+    High_DiscT_Al_Active: req.body.discreteInputs[36],
+    Fan_Over_Al_Active: req.body.discreteInputs[37],
+    Low_SuctT_Al_Active: req.body.discreteInputs[38],
+    Board2_Offline: req.body.discreteInputs[39],
+    Comp_On: req.body.discreteInputs[40],
+    Flush_Valve_Flush_Valve_On: req.body.discreteInputs[41],
+    Flush_Valve_Cold_SuplyW_Vlv: req.body.discreteInputs[42],
+    Alrm_Prob11_Active: req.body.discreteInputs[43],
+    Alrm_Prob12_Active: req.body.discreteInputs[44],
+    Alrm_Master_Unit_Active: req.body.discreteInputs[45],
+    Alrm_Slave_Unit_Active: req.body.discreteInputs[46],
+    Alrm_Low_EvapInT_Active: req.body.discreteInputs[47],
+    Alrm_Low_HT1_Active: req.body.discreteInputs[48],
+    Alrm_High_CT1_Active: req.body.discreteInputs[49],
+    Al_Warm_Supply_Low_Active: req.body.discreteInputs[50],
+    Al_Warm_Supply_High_Active: req.body.discreteInputs[51],
+    AlarmMng_Read_Ain1_Al: req.body.discreteInputs[52],
+    AlarmMng_Read_Ain2_Al: req.body.discreteInputs[53],
+    AlarmMng_Read_Ain3_Al: req.body.discreteInputs[54],
+    Read_Ain4_Al: req.body.discreteInputs[55],
+    Read_Ain5_Al: req.body.discreteInputs[56],
+    Read_Ain6_Al: req.body.discreteInputs[57],
+    AlarmMng_Read_Ain11_Al: req.body.discreteInputs[58],
+    AlarmMng_Read_Ain8_Al: req.body.discreteInputs[59],
+    AlarmMng_Read_Ain9_Al: req.body.discreteInputs[60],
+    Cold_P2: req.body.discreteInputs[61],
+    LowP_SenserRead_Active: req.body.discreteInputs[62],
+    HighP_SenserRead_Active: req.body.discreteInputs[63],
+
+    //HOLDING REGISTERS
+
+
+    //INPUT REGISTERS
+    Suct_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Evap_Inlet_Temp: uInt16ToFloat32([req.body.inputRegisters[3],req.body.inputRegisters[4]]),
+    Cond_Outlet_Temp: uInt16ToFloat32([req.body.inputRegisters[5],req.body.inputRegisters[6]]),
+    Hot_Supply_Temp: uInt16ToFloat32([req.body.inputRegisters[7],req.body.inputRegisters[8]]),
+    Hot_Return_Temp: uInt16ToFloat32([req.body.inputRegisters[9],req.body.inputRegisters[10]]),
+    Cold_Supply_Temp: uInt16ToFloat32([req.body.inputRegisters[11],req.body.inputRegisters[12]]),
+    Cold_Return_Temp: uInt16ToFloat32([req.body.inputRegisters[13],req.body.inputRegisters[14]]),
+    Hot_Tank_Temp1: uInt16ToFloat32([req.body.inputRegisters[15],req.body.inputRegisters[16]]),
+    Hot_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[17],req.body.inputRegisters[18]]),
+    HP_Yout1_Act: uInt16ToFloat32([req.body.inputRegisters[19],req.body.inputRegisters[20]]),
+    HP_Yout2_Act: uInt16ToFloat32([req.body.inputRegisters[21],req.body.inputRegisters[22]]),
+    Disc_Temp: uInt16ToFloat32([req.body.inputRegisters[23],req.body.inputRegisters[24]]),
+    Flow_Switch_Read_Cold_FlowS1: uInt16ToFloat32([req.body.inputRegisters[30],req.body.inputRegisters[31]]),
+    Flow_Switch_Read_Hot_FlowS1: uInt16ToFloat32([req.body.inputRegisters[32],req.body.inputRegisters[33]]),
+    Flow_Switch_Read_Hot_FlowS2: uInt16ToFloat32([req.body.inputRegisters[34],req.body.inputRegisters[36]]),
+    ColdFlow_Senser_Al_Active: req.body.inputRegisters[36],
+    HotFlow1_Senser_Al_Active: req.body.inputRegisters[37],
+    HotFlow2_Senser_Al_Active: req.body.inputRegisters[38],
+    Flow_Switch_ColdFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_ColdFS_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_HotFS1_Feq: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_HotFS1_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_HotFS2_Feq: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_HotFS2_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Hot_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Cold_Tank_Temp1: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Cold_Tank_Temp2: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Cold_Tank_Temp3: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Cold_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Warm_ToBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Warm_ReturnBuild_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Hot_SupToVlv_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Ele_Boost_Temp: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Heat_Exchange_Cold: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Heat_Exchange_Hot: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    EVD_Emb_1_Params_EVDEMB_1_EVD_Variables_EEV_PosSteps_Val: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    EVD_Emb_1_Params_EVDEMB_1_EVD_Variables_EEV_PosPercent_Val: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    CP_Yout1_Act: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    CP_Yout2_Act: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Flow_Switch_ColdFS2_Char: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    Low_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]]),
+    High_Pressure: uInt16ToFloat32([req.body.inputRegisters[1],req.body.inputRegisters[2]])
   }
-  console.log(req.body);
   iotdb.collection(req.params.deviceid).insertOne(LegioGuardDataObject).then (function() {
   });
   res.send("o");
   //AlarmProcessor(req.params.deviceid,req.body,"jwalstab");
   res.end();
 });
+
+
+function uInt16ToFloat32(data){
+  var ui16 = new Uint16Array(data);
+  var fl32 = new Float32Array(ui16.buffer, ui16.byteOffset, ui16.byteLength / Float32Array.BYTES_PER_ELEMENT);
+  return fl32[0];
+}

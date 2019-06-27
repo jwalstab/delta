@@ -1,3 +1,5 @@
+
+
 <section class="content">
     <div class="container">
         <div class="row clearfix">
@@ -23,7 +25,7 @@
                     <div class="header">
                         <h2><strong>Selected IoT Device</strong></h2>
                         <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            <button class="btn btn-primary btn-round dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 Select Device
                                 <span class="caret"></span>
                             </button>
@@ -38,7 +40,7 @@
                         </div>
                         <!--choose label dropdown-->
                         <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            <button class="btn btn-primary btn-round dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                             Select Value
                             <span class="caret"></span>
                             </button>
@@ -48,7 +50,7 @@
                         </div>
                         <!--choose operator dropdown-->
                         <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <button class="btn btn-primary btn-round dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                   Choose Operator
                                   <span class="caret"></span>
                                 </button>
@@ -62,7 +64,7 @@
                                 <input type="text" id="alarmnumberinputbox" class="form-control" placeholder="Number to check agaisnt">
                         </div>
                         <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <button class="btn btn-primary btn-round dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                   Email Alerts Options
                                   <span class="caret"></span>
                                 </button>
@@ -74,23 +76,23 @@
                         <div class="form-group">
                                 <input type="text" id="emailAddressInputBox" class="form-control" placeholder="Email Address">
                         </div>
-                        <button class="btn btn-success" id="myButton" onclick="AddAlarmButtonPress()">Create new alarm</button>
+                        <button class="btn btn-success btn-round" id="myButton" onclick="AddAlarmButtonPress()">Create new alarm</button>
                     </div>
                     <div class="header">
                             <h2><strong>Remove an alarm</strong></h2>
                             <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <button class="btn btn-primary btn-round dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                     Select Alarm
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1" id="alarmMenu">
                                 </ul>
                             </div>
-                            <button class="btn btn-danger" id="myButton" onclick="RemoveAlarmButtonPress()">Remove alarm</button>
+                            <button class="btn btn-danger btn-round" id="myButton" onclick="RemoveAlarmButtonPress()">Remove alarm</button>
                     </div>
                     <div class="header">
                             <h2><strong>Triggered Alarms</strong></h2>
-                            <button class="btn btn-danger" onclick="ClearTriggeredAlarms()">Clear Triggered Alarms</button>
+                            <button class="btn btn-danger btn-round" onclick="ClearTriggeredAlarms()">Clear Triggered Alarms</button>
                     </div>
                 </div>
             </div>
@@ -130,6 +132,7 @@
     var triggeredAlarmsList = [];
     var chosenUser = "jwalstab";
 
+    
     LoadDeviceSelectMenu();
     ChooseOperatorDropDownBox();
     ChooseEmailNotificationDropDownBox();
@@ -501,4 +504,5 @@
             }
         });
 }
+
 </script>

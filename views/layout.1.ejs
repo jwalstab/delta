@@ -1,40 +1,43 @@
-
 <!doctype html>
 <html class="no-js " lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-<meta name="description" content="Responsive Bootstrap 4 and web Application ui kit.">
-
-<title>Quantum Data Technologies IoT Portal</title>
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-<link rel="stylesheet" href="/assets/plugins/bootstrap/css/bootstrap.min.css">
-<link  rel="stylesheet" href="assets/css/main.css">
-<link rel="stylesheet" href="assets/css/color_skins.css">
-<style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="description" content="Responsive Bootstrap 4 and web Application ui kit.">
+    <title>:: Quantum Data Dashboard :: Home</title>
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon"> <!-- Favicon-->
+    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/plugins/jvectormap/jquery-jvectormap-2.0.3.min.css" />
+    <link rel="stylesheet" href="assets/plugins/morrisjs/morris.min.css" />
+    <!-- Custom Css -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/color_skins.css">
+    <!-- Jquery Core Js -->
+    <<script src="assets/bundles/libscripts.bundle.js"></script> <!-- Lib Scripts Plugin Js ( jquery.v3.2.1, Bootstrap4 js) -->
     
-</style>
+    <script src="assets/bundles/vendorscripts.bundle.js"></script> <!-- slimscroll, waves Scripts Plugin Js -->
+    <!-- <script src="assets/plugins/chartjs/Chart.bundle.js"></script>-->
+    <!-- <script src="assets/bundles/Chart.min.js"></script> -->
+    <script src="assets/bundles/utils.js"></script>
+    <script src="assets/bundles/morrisscripts.bundle.js"></script><!-- Morris Plugin Js -->
+    <script src="assets/bundles/jvectormap.bundle.js"></script> <!-- JVectorMap Plugin Js -->
+    <script src="assets/bundles/knob.bundle.js"></script> <!-- Jquery Knob-->
+    <script src="assets/bundles/mainscripts.bundle.js"></script>
+    <script src="assets/js/pages/widgets/infobox/infobox-1.js"></script>
 
-<!-- Jquery Core Js --> 
-<script src="assets/bundles/libscripts.bundle.js"></script> <!-- Lib Scripts Plugin Js --> 
-<script src="assets/bundles/vendorscripts.bundle.js"></script> <!-- Lib Scripts Plugin Js --> 
-<script src="assets/bundles/mainscripts.bundle.js"></script><!-- Custom Js --> 
+    <link href="assets/tabulator.css" rel="stylesheet">
+    <script type="text/javascript" src="assets/tabulator.js"></script>
+    <link href="assets/scroll.css" rel="stylesheet">
+    
+
 
 </head>
 
-
 <script>
-    //var masterURL = "http://165.22.241.11:3000" //CLOUD
+    var masterURL = "http://165.22.241.11:3000" //CLOUD
     //var masterURL = "http://127.0.0.1:3000" //LOCAL
-    var masterURL = "http://192.168.43.86:3000";
 </script>
-
-
-<link href="assets/tabulator.css" rel="stylesheet">
-<script type="text/javascript" src="assets/tabulator.js"></script>
-<link href="assets/scroll.css" rel="stylesheet">
-
 
 <body class="theme-purple">
     <!-- Page Loader -->
@@ -55,7 +58,7 @@
                 <div class="col-12">
                     <div class="navbar-logo">
                         <a href="javascript:void(0);" class="bars"></a>
-                        <a class="navbar-brand"><img src="assets/images/Qtmdatawhite.png" width="200" alt="QD"><span class="m-l-10"></span></a>
+                        <a class="navbar-brand" href="index"><img src="assets/images/Qtmdatawhite.png" width="165" alt="QD"><span class="m-l-10"></span></a>
                     </div>
                     <ul class="nav navbar-nav">
                         <li class="dropdown notifications">
@@ -90,10 +93,10 @@
                                         <h6 class="user-name m-b-0">Legioguard</h6>
                                     </div>
                                 </li>
-                                <li><a href="/"><i class="icon-power m-r-10"></i><span>Sign Out</span></a></li>
+                                <li><a href="sign-in.html"><i class="icon-power m-r-10"></i><span>Sign Out</span></a></li>
                             </ul>
                         </li>
-                        <!-- <li><a href="javascript:void(0);" class="js-right-sidebar"><i class="icon-equalizer"></i></a></li> -->
+                        <li><a href="javascript:void(0);" class="js-right-sidebar"><i class="icon-equalizer"></i></a></li>
                     </ul>
                 </div>
             </div>
