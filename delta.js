@@ -978,8 +978,17 @@ app.post("/legioguard/postdatafordevice/:deviceid", function(req, res) {
 });
 
 
-function uInt16ToFloat32(data){
+/* function uInt16ToFloat32(data){
   var ui16 = new Uint16Array(data);
   var fl32 = new Float32Array(ui16.buffer, ui16.byteOffset, ui16.byteLength / Float32Array.BYTES_PER_ELEMENT);
   return fl32[0];
+} */
+function uInt16ToFloat32(uint16array) {
+  var buffer = new ArrayBuffer(4);
+  var intView = new Uint16Array(buffer);
+  var floatView = new Float32Array(buffer);
+
+  intView[0] = uint16array[0];
+  intView[1] = uint16array[1];
+  return floatView[0];
 }
